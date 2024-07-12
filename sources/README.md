@@ -1,9 +1,9 @@
 ESPKit for Sprinter computer
 ============================
 
-Библиотека и приложения для карты Sprinter-WiFi,  ISA-8 карты на модуле ESP8266 (ESP12-E,ESP12F).
+Исходные коды на ассемблере [sjasmplus](https://github.com/z00m128/sjasmplus) для [Sprinter DSS Estex](sources/DSS).
 
-Исходные коды для [Sprinter DSS](sources/DSS) и для [MS-DOS](sources/DOS)
+Исходные коды на Boland C++ 3.0 для [MS-DOS](sources/DOS).
 
 [Sprinter-WiFi](https://github.com/romychs/SprinterESP)
 
