@@ -282,13 +282,18 @@ _FIND_FIRST
 	LD 		HL, ZIP_FILE_NAME
 	LD 		BC,9
 	LDIR
-	POP DE
+	POP 	DE
     JP      NORM_EXIT
 
 
 _SCANKEY
-	XOR		A
-    JP      NORM_EXIT
+    POP 	BC
+    POP 	HL    
+	LD		A,1
+	AND		A
+	LD		E, 'x'
+	LD 		B, KB_ALT | KB_L_ALT
+    RET
 
 
 ; Выходные значения:

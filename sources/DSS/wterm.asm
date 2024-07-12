@@ -61,6 +61,7 @@ START
     IF DEBUG == 1
     	; LD 		IX,CMD_LINE1
 		LD		SP, STACK_TOP
+		JP MAIN_LOOP
     ENDIF
 
 	CALL 	ISA.ISA_RESET
@@ -83,8 +84,8 @@ START
 
 	CALL	WIFI.UART_EMPTY_RS
 
-	XOR		A
-	LD		(Q_POS),A
+	; XOR		A
+	; LD		(Q_POS),A
 
 MAIN_LOOP
 	; handle key pressed
@@ -92,65 +93,67 @@ MAIN_LOOP
 	RST		DSS
 	JP		Z,HANDLE_RECEIVE							; if no key pressed
 
-	; check for QUIT command
-	LD		A,(Q_POS)
-	CP		4
-	JP		P,NO_QUIT
+	; Check for Alt+x
+	; IF TRACE
+	; LD		D,A
+	; LD		A,B
+	; AND		KB_ALT
+	; JP		Z, NO_QUIT
+	; LD		C,D
+	; PUSH	BC,DE,HL
+	; LD		DE, MSG_ALT_KEY
+	; CALL	UTIL.HEXB
+	; PRINTLN	MSG_ALT
+	; POP		HL,DE,BC
 
-	LD 		IX, CMD_QUIT
-Q_POS		EQU $+2
-	LD		A,(IX+0x00)
-	; compare current char with "QUIT" str
-	CP		E
-	JR		NZ,NO_QUIT
-
-	LD		HL,Q_POS
-	INC		(HL)
-	LD		A,(HL)
-	CP		5
-	JP		Z,OK_EXIT
-	JR		OUT_CHAR
+	; ELSE
+	LD		A,D
+	;AND		0xDF
+	CP		0xAB
+	JR		NZ, NO_QUIT
+	LD		A,B
+	AND		KB_ALT
+	JP		NZ, OK_EXIT
+	;ENDIF
 
 NO_QUIT
-	XOR		A
-	LD		(Q_POS), A
 
 OUT_CHAR
 	LD		A, E
 	CP		CR
-	JR		Z, PUT_CHAR
-	CP		0x20
-	JP		M, HANDLE_CR_LF
+	JR		NZ, CHK_PRINTABLE
+	CALL	PUT_A_CHAR
+	LD		A,LF
+	CALL	PUT_A_CHAR
+	JR		TX_SYMBOL
 
-PUT_CHAR
+CHK_PRINTABLE
+	CP		0x20
+	JP		M, HANDLE_RECEIVE							; do not print < ' '	
 	CALL	PUT_A_CHAR
 
-HANDLE_CR_LF
+	; transmitt symbol
+TX_SYMBOL
 	CALL    WIFI.UART_TX_BYTE
 	JP		C,TX_WARN
 	LD		A, E
 	CP		CR
-	JR		NZ,NO_TX_LF
+	JR		NZ,HANDLE_RECEIVE
+	; Transmitt LF after CR
 	LD		E,LF
 	CALL    WIFI.UART_TX_BYTE
 	JP		C,TX_WARN
-	JR		HANDLE_RECEIVE
-
-NO_TX_LF
-	CP		LF
-	JR		NZ,HANDLE_RECEIVE
-	LD		E,CR
-	CALL    WIFI.UART_TX_BYTE
-	JP		C,TX_WARN
-
+ 
 	; check receiver and handle received bytes
 HANDLE_RECEIVE
 	; check receiver status
-	LD		HL,REG_LCR
+	LD		HL,REG_LSR
 	CALL	WIFI.UART_READ
-	CP		LSR_RCVE
+	LD		D,A
+	AND		LSR_RCVE
 	JP		NZ, RX_WARN
-	CP		LSR_DR
+	LD		A,D
+	AND		LSR_DR
 	JP		Z, CHECK_FOR_END
 	; rx queue is not empty, read
 	LD		HL,REG_RBR
@@ -167,11 +170,16 @@ HANDLE_RECEIVE
 CHK_1F
 	CP		0x20
 	CALL	P, PUT_A_CHAR
+	; reset error counter if received symbol withoud error
+	XOR		A
+	LD		(RX_ERR),A
 
 CHECK_FOR_END
-	LD		A,(Q_POS)
-	CP		5
-	JP		Z, OK_EXIT	
+	; LD		A,(Q_POS)
+	; CP		5
+	; JP		Z, OK_EXIT
+
+
 	JP		MAIN_LOOP
 
 RX_WARN
@@ -179,10 +187,21 @@ RX_WARN
 	LD		DE,MSG_LSR_VALUE
 	CALL	UTIL.HEXB
 	PRINTLN	MSG_RX_ERROR
-	JP		MAIN_LOOP
+	CALL	WIFI.UART_EMPTY_RS
+	LD		HL,RX_ERR
+	INC		(HL)
+	LD		A,(HL)
+	CP		100	
+	JP		M,MAIN_LOOP
+	; too many RX errors
+	PRINTLN MSG_MANY_RX_ERROR
+	LD		B,5
+	JP		WCOMMON.EXIT
+	
+
 
 TX_WARN
-	PRINTLN MSG_TX_ERROR
+	PRINTLN MSG_TX_ERROR	
 	JP		MAIN_LOOP
 
 PUT_A_CHAR
@@ -207,9 +226,10 @@ OK_EXIT
 ; ------------------------------------------------------
 
 MSG_START
-	DB "Terminal for Sprinter-WiFi by Sprinter Team. v1.0.1, ", __DATE__, "\r\n", 0
+	DB "Terminal for Sprinter-WiFi by Sprinter Team. v1.0 beta1, ", __DATE__, "\r\n", 0
 MSG_HLP
-	DB"\r\nEnter ESP AT command or QUIT to close terminal.",0
+	DB"\r\nEnter ESP AT command or Alt+x to close terminal.",0
+MSG_EXIT
 
 MSG_TX_ERROR
 	DB "Transmitter not ready",0
@@ -219,6 +239,15 @@ MSG_RX_ERROR
 MSG_LSR_VALUE	
 	DB "xx",0
 
+MSG_MANY_RX_ERROR
+	DB "Too many receiver errors!",0
+
+
+MSG_ALT
+	DB "Pressed ALT+"
+MSG_ALT_KEY
+	DB "xx",0
+
 ; TX_DATA
 ; 	DB  " ",0
 ; ------------------------------------------------------
@@ -226,6 +255,9 @@ MSG_LSR_VALUE
 ; ------------------------------------------------------
 CMD_QUIT 
     DB "QUIT\r",0
+
+RX_ERR
+	DB 0
 
 	IF DEBUG == 1
 CMD_TEST1	DB "ATE0\r\n",0	

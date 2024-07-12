@@ -41,3 +41,12 @@ DSS_VMOD_G640		EQU 0x82							; graphics 640x256, 16 colors
 E_FILE_EXISTS       EQU 7
 E_FILE_NOT_FOUND    EQU 3
 
+; Keyboard Shift key status bits
+KB_R_ALT			EQU 0x01
+KB_R_CTRL			EQU 0x02
+KB_L_ALT			EQU 0x04
+KB_L_CTRL			EQU 0x08
+KB_ALT				EQU 0x10
+KB_CTRL				EQU 0x20
+KB_R_SHIFT			EQU 0x40
+KB_L_SHIFT			EQU 0x80

@@ -202,9 +202,10 @@ UART_WAIT_TR
 ; Wait, without open/close ISA
 ;
 UART_WAIT_TR_INT
-	PUSH	AF, BC, HL
-	LD BC,	500
-	LD HL, 	REG_LSR
+	PUSH	BC, HL, DE
+	LD		D,A
+	LD 		BC,	500
+	LD 		HL,	REG_LSR
 WAIT_TR_BZY           
 	LD 		A,(HL)
 	AND 	A, LSR_THRE
@@ -216,7 +217,8 @@ WAIT_TR_BZY
 	JR 		NZ,WAIT_TR_BZY
 	SCF
 WAIT_TR_RDY
-	POP 	HL, BC, AF
+	LD		A,D
+	POP 	DE, HL, BC
 	RET
 
 ; ------------------------------------------------------
@@ -225,12 +227,14 @@ WAIT_TR_RDY
 ; Out: CF=1 - Not ready
 ; ------------------------------------------------------
 UART_TX_BYTE
+	PUSH	DE
 	CALL 	UART_WAIT_TR
 	JP		C, UTB_NOT_R
 	LD		HL, REG_THR
 	CALL 	UART_WRITE
 	XOR		A
 UTB_NOT_R
+	POP		DE
 	RET
 
 ; ------------------------------------------------------
