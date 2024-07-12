@@ -12,6 +12,6 @@
 #define MSG_START "Terminal for Sprinter WiFi Card (ESP8266)\nv1.0.0 by Romych (Boykov Roman)\n\n",0
 #define MSG_NOT_FOUND "No Sprinter WiFi card found!\n"
 #define MSG_FOUND "Sprinter WiFi card found at slot: %d\n"
-#define MSG_HLP "\nEnter ESP AT comand or QUIT to close terminal.\n"
+#define MSG_HLP "\nEnter ESP AT command or QUIT to close terminal.\n"
 
 #endif
