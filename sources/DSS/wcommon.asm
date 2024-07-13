@@ -5,6 +5,8 @@
 ; License: BSD 3-Clause
 ; ======================================================
 
+ENABLE_RTS_CTR	EQU 1
+
 	MODULE WCOMMON
 
 ; ------------------------------------------------------
@@ -155,8 +157,10 @@ INIT_ESP
    	TRACELN MSG_NO_SLEEP
 	SEND_CMD CMD_NO_SLEEP
 
-   	TRACELN MSG_SET_UART
-	SEND_CMD CMD_SET_SPEED
+	IF ENABLE_RTS_CTR
+   		TRACELN MSG_SET_UART
+		SEND_CMD CMD_SET_SPEED
+	ENDIF
 
    	TRACELN MSG_SET_OPT
 	SEND_CMD CMD_CWLAP_OPT

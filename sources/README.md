@@ -1,9 +1,9 @@
 ESPKit for Sprinter computer
 ============================
 
-Исходные коды на ассемблере [sjasmplus](https://github.com/z00m128/sjasmplus) для [Sprinter DSS Estex](sources/DSS).
+[Исходные коды](sources/DSS) на ассемблере [sjasmplus](https://github.com/z00m128/sjasmplus) для Sprinter DSS Estex.
 
-Исходные коды на Boland C++ 3.0 для [MS-DOS](sources/DOS).
+[Исходные коды](sources/DOS) на Boland C++ 3.0 для [FreeDOS](https://gitlab.com/FreeDOS).
 
 [Sprinter-WiFi](https://github.com/romychs/SprinterESP)
 

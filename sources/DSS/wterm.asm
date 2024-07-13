@@ -226,7 +226,7 @@ OK_EXIT
 ; ------------------------------------------------------
 
 MSG_START
-	DB "Terminal for Sprinter-WiFi by Sprinter Team. v1.0 beta1, ", __DATE__, "\r\n", 0
+	DB "Terminal for Sprinter-WiFi by Sprinter Team. v1.0 beta2, ", __DATE__, "\r\n", 0
 MSG_HLP
 	DB"\r\nEnter ESP AT command or Alt+x to close terminal.",0
 MSG_EXIT
