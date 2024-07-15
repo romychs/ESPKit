@@ -84,37 +84,17 @@ START
 
 	CALL	WIFI.UART_EMPTY_RS
 
-	; XOR		A
-	; LD		(Q_POS),A
-
 MAIN_LOOP
 	; handle key pressed
 	LD		C,DSS_SCANKEY
 	RST		DSS
 	JP		Z,HANDLE_RECEIVE							; if no key pressed
-
-	; Check for Alt+x
-	; IF TRACE
-	; LD		D,A
-	; LD		A,B
-	; AND		KB_ALT
-	; JP		Z, NO_QUIT
-	; LD		C,D
-	; PUSH	BC,DE,HL
-	; LD		DE, MSG_ALT_KEY
-	; CALL	UTIL.HEXB
-	; PRINTLN	MSG_ALT
-	; POP		HL,DE,BC
-
-	; ELSE
 	LD		A,D
-	;AND		0xDF
 	CP		0xAB
 	JR		NZ, NO_QUIT
 	LD		A,B
 	AND		KB_ALT
 	JP		NZ, OK_EXIT
-	;ENDIF
 
 NO_QUIT
 
@@ -167,9 +147,11 @@ HANDLE_RECEIVE
 	CALL	PUT_A_CHAR
 	JP		CHECK_FOR_END
 
+	; check for printable symbol, and print
 CHK_1F
 	CP		0x20
 	CALL	P, PUT_A_CHAR
+	
 	; reset error counter if received symbol withoud error
 	XOR		A
 	LD		(RX_ERR),A
@@ -178,8 +160,6 @@ CHECK_FOR_END
 	; LD		A,(Q_POS)
 	; CP		5
 	; JP		Z, OK_EXIT
-
-
 	JP		MAIN_LOOP
 
 RX_WARN
@@ -211,7 +191,6 @@ PUT_A_CHAR
 	POP		DE,BC
 	RET
 
-
 ; ------------------------------------------------------
 ; Do Some
 ; ------------------------------------------------------
@@ -226,27 +205,27 @@ OK_EXIT
 ; ------------------------------------------------------
 
 MSG_START
-	DB "Terminal for Sprinter-WiFi by Sprinter Team. v1.0 beta2, ", __DATE__, "\r\n", 0
+	DB "Terminal for Sprinter-WiFi by Sprinter Team. v1.0 beta3, ", __DATE__, "\r\n"Z
 MSG_HLP
-	DB"\r\nEnter ESP AT command or Alt+x to close terminal.",0
+	DB"\r\nEnter ESP AT command or Alt+x to close terminal."Z
 MSG_EXIT
 
 MSG_TX_ERROR
-	DB "Transmitter not ready",0
+	DB "Transmitter not ready"Z
 
 MSG_RX_ERROR
 	DB "Receiver error LSR: 0x"
 MSG_LSR_VALUE	
-	DB "xx",0
+	DB "xx"Z
 
 MSG_MANY_RX_ERROR
-	DB "Too many receiver errors!",0
+	DB "Too many receiver errors!"Z
 
 
 MSG_ALT
 	DB "Pressed ALT+"
 MSG_ALT_KEY
-	DB "xx",0
+	DB "xx"Z
 
 ; TX_DATA
 ; 	DB  " ",0
@@ -254,13 +233,13 @@ MSG_ALT_KEY
 ; Custom commands
 ; ------------------------------------------------------
 CMD_QUIT 
-    DB "QUIT\r",0
+    DB "QUIT\r"Z
 
 RX_ERR
 	DB 0
 
 	IF DEBUG == 1
-CMD_TEST1	DB "ATE0\r\n",0	
+CMD_TEST1	DB "ATE0\r\n"Z
 BUFF_TEST1	DS RS_BUFF_SIZE,0
 	ENDIF
 

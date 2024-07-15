@@ -37,3 +37,13 @@
 			POP DE,BC
 		ENDIF
 	ENDM
+
+	; Execute specified DSS function
+	MACRO	DSS_EXEC	func
+		IF func>255
+			LD		BC,func
+		ELSE
+		 	LD		C,func
+		ENDIF
+		RST		DSS
+	ENDM

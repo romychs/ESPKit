@@ -48,7 +48,7 @@ ISA_OPEN
 	LD 		BC, PORT_SYSTEM
 	LD 		A, 0x11
 	OUT 	(C), A
-ISA_SLOT+*	LD	A,0x01
+ISA_SLOT+*	LD	A,0x00
 	SLA		A
 	OR 		A, 0xD4										; D4 - ISA1, D6 - ISA2
 	LD		BC, PAGE3

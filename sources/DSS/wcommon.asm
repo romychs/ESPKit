@@ -193,6 +193,7 @@ MSG_SLOT_NO
 
 MSG_COMM_ERROR
 	DB "Error communication with Sprinter-WiFi #"
+	
 COMM_ERROR_NO
 	DB "n!",0
 
