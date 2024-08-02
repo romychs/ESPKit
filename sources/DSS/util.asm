@@ -246,6 +246,58 @@ CONV_NIBLE
 	RET
 	ENDIF
 
+
+; ----------------------------------------------------
+;  Get full current path
+;  Inp: HP - pointer to buffer for path
+; ----------------------------------------------------
+	
+GET_CUR_DIR
+	PUSH    HL
+	LD      C, DSS_CURDISK
+	RST     DSS
+	CALL	DSS_ERROR.CHECK
+	ADD     A, 65
+	LD      (HL),A
+	INC     HL
+	LD      (HL),':'
+	INC     HL
+	LD      C, DSS_CURDIR
+	RST     DSS
+	CALL	DSS_ERROR.CHECK
+	POP     HL
+	CALL    ADD_BACK_SLASH
+	RET
+
+; ----------------------------------------------------
+; Add back slash to path string
+; Inp: HL - pointer to zero ended string with path
+; Out: HL - point to end
+; ----------------------------------------------------
+ADD_BACK_SLASH
+    XOR     A
+    ; find end of path
+.FIND_EOS
+    CP      (HL)
+    JR      Z,.IS_EOS
+    INC     HL
+    JR      .FIND_EOS
+	; check last symbol is '\'' and add if not
+.IS_EOS
+	DEC     HL
+    LD      A,(HL)
+    CP      "\\"
+    JR      Z,.IS_SEP
+    INC     HL
+    LD      (HL),"\\"
+.IS_SEP
+	; mark new end of string
+    INC     HL
+    LD      (HL),0x0
+    RET
+	
+
+
 	ENDMODULE
 	
 	ENDIF

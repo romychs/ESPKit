@@ -363,6 +363,16 @@ _EXIT
 CMD_LINE_TFTP_D
 	DB " tftp://tftp.server.ru:1024/file_in.asm  c:\\tmp\\file_out.asm"Z
 
+CMD_LINE_TFTP_D1
+	DB " tftp://tftp.server.ru:1024/file_in.asm"Z
+
+CMD_LINE_TFTP_U
+	DB " file_up.txt tftp://tftp.server.ru:9999/file_in.asm "Z
+
+CMD_LINE_TFTP_U1
+	DB " file_up.txt"Z
+
+
 IN_FILE
 	DS 1024,0
 IN_FILE_END

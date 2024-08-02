@@ -25,11 +25,13 @@ EXE_VERSION         EQU 1
 ; Timeout to wait ESP response
 DEFAULT_TIMEOUT		EQU	2000
 
-	DEFDEVICE SPRINTER, 0x4000, 256, 0,1,2,3
+	DEVICE NOSLOT64K
 
-    SLDOPT COMMENT WPMEM, LOGPOINT, ASSERTION
+;	DEFDEVICE SPRINTER, 0x4000, 256, 0,1,2,3
 
-    DEVICE SPRINTER ;NOSLOT64K
+;   SLDOPT COMMENT WPMEM, LOGPOINT, ASSERTION
+
+;    DEVICE SPRINTER ;NOSLOT64K
 	
     IF  DEBUG == 1
 		INCLUDE "dss.asm"
@@ -68,13 +70,18 @@ START
 	
     IF DEBUG == 1
     	LD 		IX,CMD_LINE_TFTP_D
-		LD		SP, STACK_TOP
-		JP MAIN_LOOP
+		LD		SP, STACK_TOP		
     ENDIF
 	
 	CALL	PARSE_CMD_LINE
 
-	CALL	OPEN_LOCAL_FILE
+	;CALL	OPEN_LOCAL_FILE
+	CALL	DISPLAY_MODE
+
+
+	IF DEBUG == 1
+		JP 		MAIN_LOOP
+	ENDIF
 
 	CALL 	ISA.ISA_RESET
 	
@@ -126,13 +133,12 @@ PARSE_CMD_LINE
 	; Work Mode "Download"
 
 	; handle parameter URL
-	LD		DE,0x0007
-	ADD 	HL,DE
 	CALL	GET_SRV_PARAMS
 	CALL	SKIP_SPACES
     
 	; handle lfn
 	CALL	GET_LFN
+	CALL	COPY_LFN
 	RET
 	
 .PLC_UPLOAD
@@ -142,6 +148,11 @@ PARSE_CMD_LINE
 
 	CALL	GET_LFN
 	CALL	SKIP_SPACES
+
+	LD		DE,TFTF_START
+	CALL	@UTIL.STARTSWITH
+	JR		NZ,OUT_USAGE_MSG
+
 	CALL	GET_SRV_PARAMS
 
 	RET
@@ -161,6 +172,10 @@ OUT_USAGE_MSG
 ; ------------------------------------------------------
 GET_SRV_PARAMS
 	PUSH	BC,DE
+
+	LD		DE,0x0007
+	ADD 	HL,DE
+
 	LD		DE,SRV_NAME
 .GSN_NEXT
 	LD		A,(HL)
@@ -182,17 +197,15 @@ GET_SRV_PARAMS
 	INC		HL											
 	LD		A,(HL)
 	CP		A,'/'										; end slash
-	JR		.GSN_EN
+	JR		Z,.GSN_EN
 	CP		A,'0'
 	JP		M,.GSN_EPN
-	CP		A,'9'										; >'9'?
+	CP		A,0x3A										; >'9'?
 	JP		P,.GSN_EPN
 	LD		(DE),A
 	INC		DE
-	DEC		B
-	JR		Z,.GSN_EPN									; too long number
-	JR		.GSNP_NXT
-	; end of numbers
+	DJNZ	.GSNP_NXT
+	; too long number
 
 
 .GSN_EPN
@@ -216,8 +229,10 @@ GET_SRV_PARAMS
 .GDNF_NXT	
 	INC		HL
 	LD		A,(HL)
-	OR		A
-	JR		Z,.GDNF_END
+;	OR		A
+;	JR		Z,.GDNF_END
+	CP		0x21
+	JP		M,.GDNF_END
 	LD		(DE),A
 	INC		DE
 	DEC		B
@@ -243,38 +258,68 @@ GET_SRV_PARAMS
 ; ------------------------------------------------------
 GET_LFN
 	PUSH	BC,DE
-
-	XOR		B	
 	LD		DE,LOC_FILE
+
+.GLF_NXT	
 	LD		A,(HL)
 	OR		A
-	JR		Z,.GLF_E
+	JR		Z,.GLF_END
 	CP      ' '
-	JR		Z,.GLF_E
-	; CP		"\\"
-	; CALL    Z,.GLF_SET_DIR
-	; CP		":"
-	; CALL    Z,.GLF_SET_DIR
+	JR		Z,.GLF_END
 	CP		0x21
 	JP		M,.GLF_IFN
 	CP		'*'
 	JP		Z,.GLF_IFN
+	CP		':'
+	CALL	.GLF_HAVE_PATH
+	CP		"\\"
+	CALL	.GLF_HAVE_PATH
+
 	LD		(DE),A
+	INC		HL
+	INC		DE
+	JR		.GLF_NXT
 
-.GLF_E
-
+.GLF_END
 	POP		DE,BC
 	RET
 
 	; set flag to not add current dir
-.GLF_SET_DIR
-	LD		B,1
+.GLF_HAVE_PATH
+	JR		NZ, .GLF_NHP
+	LD		IY,HAVE_PATH
+	INC		(IY+0)
+.GLF_NHP	
 	RET
 
 	; Illegal file name
 .GLF_IFN
 	PRINTLN MSG_ERR_LFN
 	JP		OUT_USAGE_MSG
+
+; ------------------------------------------------------
+; Check local file name for empty and fill it from 
+; remote file name
+; ------------------------------------------------------
+COPY_LFN
+	LD		HL,LOC_FILE
+	LD		A, (HL)
+	OR		A
+	RET		NZ											; ok, it is not empty
+	CALL	UTIL.GET_CUR_DIR
+	//LD		DE,HL
+	LD		DE,REM_FILE
+.CLFN_NXT	
+	LD		A,(DE)
+	LD		(HL),A
+	OR		A
+	RET		Z
+	INC		HL
+	INC		DE
+	JR		.CLFN_NXT
+
+
+
 
 ; ------------------------------------------------------
 ; Open local file for upload or download
@@ -303,6 +348,45 @@ SKIP_SPACES
 
 
 ; ------------------------------------------------------
+; Display current working mode
+; ------------------------------------------------------
+DISPLAY_MODE
+	LD	A,(WORK_MODE)
+	CP  A,WM_UPLOAD
+	JR	.DM_UPLOAD
+	; Download
+	PRINT MSG_MODE_D
+	PRINT REM_FILE
+	PRINT MSG_MODE_D_S
+	PRINT SRV_NAME
+	PRINT MSG_MODE_D_T
+	PRINTLN LOC_FILE
+	RET
+	; Upload
+.DM_UPLOAD
+	PRINT MSG_MODE_U
+	PRINT LOC_FILE
+	PRINT MSG_MODE_U_S
+	PRINT SRV_NAME
+	PRINT MSG_MODE_U_T
+	PRINTLN REM_FILE
+	RET
+
+MSG_MODE_D
+	DB "Download file "Z
+MSG_MODE_D_S
+	DB " from server "Z
+MSG_MODE_D_T
+	DB " to file "Z
+
+MSG_MODE_U
+	DB "Upload file "Z
+MSG_MODE_U_S
+	DB " to server "Z
+MSG_MODE_U_T
+	DB " to file "Z
+
+; ------------------------------------------------------
 ; Custom messages
 ; ------------------------------------------------------
 
@@ -314,7 +398,7 @@ MSG_ERR_CMD
 
 MSG_HLP
 	DB "\r\nUse: wtftp.exe tftp://server[:port]/filename filename  - to download file from server;\r\n"
-	DB "\twtftp.exe filename tftp://server[:port]/filename  - to upload file to server.\r\n"Z
+	DB "     wtftp.exe filename tftp://server[:port]/filename  - to upload file to server.\r\n"Z
 
 MSG_TX_ERROR
 	DB "Transmitter not ready"Z
@@ -357,11 +441,17 @@ SRV_PORT
 REM_FILE
 	DS 128,0
 
+; Name of the local file
 LOC_FILE	
 	DS 128,0
 
+; Local file handle
 LOC_FH
 	DW	0
+
+; Not null if local file name contains path
+HAVE_PATH
+	DB	0
 
 ; ------------------------------------------------------
 ; Custom commands
@@ -377,6 +467,7 @@ BUFF_TEST1	DS RS_BUFF_SIZE,0
 	ENDMODULE
 
 	INCLUDE "wcommon.asm"
+	INCLUDE "dss_error.asm"
 	;INCLUDE "util.asm"
 	INCLUDE "isa.asm"
 	INCLUDE "esplib.asm"
