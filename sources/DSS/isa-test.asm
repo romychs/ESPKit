@@ -51,10 +51,10 @@ EXE_HEADER
 ; ------------------------------------------------------
 START
 	
-    IF DEBUG == 1
+    IFDEF	DEBUG
     	; LD 		IX,CMD_LINE1
 		LD		SP, STACK_TOP
-		JP MAIN_LOOP
+		JP 		MAIN_LOOP
     ENDIF
 
 	CALL	@WCOMMON.INIT_VMODE

@@ -8,10 +8,10 @@
 
 ; Set to 1 to turn debug ON with DeZog VSCode plugin
 ; Set to 0 to compile .EXE
-DEBUG               EQU 1
+	DEFINE			DEBUG
 
 ; Set to 1 to output TRACE messages
-TRACE               EQU 1
+	DEFINE 			TRACE
 
 
 WM_DOWNLOAD			EQU 0
@@ -27,13 +27,7 @@ DEFAULT_TIMEOUT		EQU	2000
 
 	DEVICE NOSLOT64K
 
-;	DEFDEVICE SPRINTER, 0x4000, 256, 0,1,2,3
-
-;   SLDOPT COMMENT WPMEM, LOGPOINT, ASSERTION
-
-;    DEVICE SPRINTER ;NOSLOT64K
-	
-    IF  DEBUG == 1
+    IFDEF	DEBUG
 		INCLUDE "dss.asm"
 		DB 0
 		ALIGN 16384, 0
@@ -68,18 +62,20 @@ EXE_HEADER
 ; ------------------------------------------------------
 START
 	
-    IF DEBUG == 1
-    	LD 		IX,CMD_LINE_TFTP_D
+    IFDEF DEBUG
+    	LD 		IX,CMD_LINE_TFTP_D1
 		LD		SP, STACK_TOP		
     ENDIF
 	
 	CALL	PARSE_CMD_LINE
 
-	;CALL	OPEN_LOCAL_FILE
+	CALL	OPEN_LOCAL_FILE
+	
 	CALL	DISPLAY_MODE
 
+	CALL	CLOSE_LOCAL_FILE
 
-	IF DEBUG == 1
+	IFDEF	DEBUG
 		JP 		MAIN_LOOP
 	ENDIF
 
@@ -308,6 +304,9 @@ COPY_LFN
 	RET		NZ											; ok, it is not empty
 	CALL	UTIL.GET_CUR_DIR
 	//LD		DE,HL
+	LD		IX,HAVE_PATH
+	INC		(IX+0)
+			
 	LD		DE,REM_FILE
 .CLFN_NXT	
 	LD		A,(DE)
@@ -327,9 +326,67 @@ COPY_LFN
 ; WR - for download
 ; ------------------------------------------------------
 OPEN_LOCAL_FILE
-	LD	A, (WORK_MODE)
-	CP	WM_UPLOAD
+	LD		HL,LOC_FILE
+	LD 		A,(HAVE_PATH)
+	OR		A
+	JR		NZ,.OLF_SKP_CP
+	
+	LD		HL, WIFI.RS_BUFF
+	PUSH	HL
+	CALL	UTIL.GET_CUR_DIR
+	LD		DE,LOC_FILE
+	LD		B,128
+.OLF_NXT	
+	LD		A, (DE)
+	LD		(HL),A
+	OR		A
+	JR		Z, .OLF_EFN
+	INC 	HL
+	INC		DE
+	DJNZ	.OLF_NXT	
+.OLF_EFN
+	POP		HL
 
+	; HL - points to file path name
+.OLF_SKP_CP
+	LD		A, (WORK_MODE)
+	CP		WM_UPLOAD
+	JR		Z,.OLF_UPL
+
+	; create new file for write
+	XOR		A
+	LD		C,DSS_CREATE_FILE
+	RST		DSS
+	JR		NC,.OLF_END
+	CP		0x07										; file exists?
+	JP		NZ,DSS_ERROR.PRINT							; print error and exit
+	LD		A,FM_WRITE
+	JR		.OLF_FOW
+	; open existing file for read
+.OLF_UPL
+	LD		A,FM_READ
+.OLF_FOW	
+	LD		C,DSS_OPEN_FILE
+	RST		DSS
+	CALL    DSS_ERROR.CHECK
+.OLF_END
+	LD    (LOC_FH),A
+
+	TRACELN MSG_LFN_OPEN	
+
+	RET
+
+	IFDEF	TRACE
+MSG_LFN_OPEN
+	DB "Local file succes open/created."Z	
+	ENDIF
+
+CLOSE_LOCAL_FILE
+	LD		A,(LOC_FH)	
+	OR		A
+	RET		Z
+	DSS_EXEC	DSS_CLOSE_FILE
+	CALL	DSS_ERROR.CHECK
 	RET
 
 ; ------------------------------------------------------
@@ -459,10 +516,10 @@ HAVE_PATH
 RX_ERR
 	DB 0
 
-	IF DEBUG == 1
-CMD_TEST1	DB "ATE0\r\n"Z
-BUFF_TEST1	DS RS_BUFF_SIZE,0
-	ENDIF
+; 	IFDEF	DEBUG
+; CMD_TEST1	DB "ATE0\r\n"Z
+; BUFF_TEST1	DS RS_BUFF_SIZE,0
+; 	ENDIF
 
 	ENDMODULE
 

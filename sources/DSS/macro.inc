@@ -34,7 +34,7 @@
 
 	; Print data ASCIIZ string to screen if TRACE enabled
 	MACRO 	TRACELN	data
-		IF  TRACE == 1
+		IFDEF	TRACE
 			PUSH BC,DE
 			PRINTLN data
 			POP DE,BC

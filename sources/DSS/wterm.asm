@@ -6,12 +6,11 @@
 ; License: BSD 3-Clause
 ; ======================================================
 
-; Set to 1 to turn debug ON with DeZog VSCode plugin
-; Set to 0 to compile .EXE
-DEBUG               EQU 0
+; Define to turn debug ON with DeZog VSCode plugin
+;DEFINE               EQU 0
 
-; Set to 1 to output TRACE messages
-TRACE               EQU 1
+; Define to output TRACE messages
+DEFINE				TRACE
 
 
 ; Version of EXE file, 1 for DSS 1.70+
@@ -26,7 +25,7 @@ DEFAULT_TIMEOUT		EQU	2000
 
     DEVICE SPRINTER ;NOSLOT64K
 	
-    IF  DEBUG == 1
+    IFDEF	DEBUG
 		INCLUDE "dss.asm"
 		DB 0
 		ALIGN 16384, 0
@@ -61,7 +60,7 @@ EXE_HEADER
 ; ------------------------------------------------------
 START
 	
-    IF DEBUG == 1
+    IFDEF	DEBUG
     	; LD 		IX,CMD_LINE1
 		LD		SP, STACK_TOP
 		JP MAIN_LOOP
@@ -239,7 +238,7 @@ CMD_QUIT
 RX_ERR
 	DB 0
 
-	IF DEBUG == 1
+	IFDEF DEBUG
 CMD_TEST1	DB "ATE0\r\n"Z
 BUFF_TEST1	DS RS_BUFF_SIZE,0
 	ENDIF

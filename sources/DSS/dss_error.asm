@@ -14,14 +14,11 @@ CHECK
 
 PRINT
 	CALL	GET_ERR_MSG
-    LD      C,DSS_PCHARS
-    RST     DSS
-    LD      C,DSS_PCHARS
+	DSS_EXEC	DSS_PCHARS
 	LD		HL, WCOMMON.LINE_END
-	RST     DSS
+    DSS_EXEC	DSS_PCHARS
 	POP 	BC											; clear add from stack
-	LD		BC,0x0141									; and exit
-	RST		DSS
+	DSS_EXEC	0x0200+DSS_EXIT							; and exit
 
 ; ------------------------------------------------------
 ; Return pointer to DSS error message

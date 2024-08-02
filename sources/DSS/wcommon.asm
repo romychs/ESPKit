@@ -26,12 +26,9 @@ CHECK_ERROR
 ; ------------------------------------------------------
 ;	Program exit point
 ; ------------------------------------------------------
-	IFUSED	EXIT
 EXIT	
 	CALL	REST_VMODE
-    LD		C,DSS_EXIT
-    RST		DSS
-	ENDIF
+    DSS_EXEC	DSS_EXIT
 ; ------------------------------------------------------
 ; Search Sprinter WiFi card
 ; ------------------------------------------------------
@@ -57,7 +54,7 @@ NO_TL_FOUND
 ; Dump all UTL16C550 registers to screen for debug
 ; ------------------------------------------------------
 	IFUSED DUMP_UART_REGS
-	IF TRACE
+	IFDEF	TRACE
 DUMP_UART_REGS
 	; Dump, DLAB=0 registers
 	LD		BC, 0x0800
@@ -231,7 +228,7 @@ SAVE_VMODE
 ; ------------------------------------------------------
 ; Debug messages
 ; ------------------------------------------------------
-	IF TRACE
+	IFDEF TRACE
 MSG_DR
 	DB	"Reg[0x"
 MSG_DR_RN	
