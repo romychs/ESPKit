@@ -4,6 +4,9 @@
 ; https://github.com/romychs
 ; ======================================================
 
+	IFNDEF	_DSS_INC
+	DEFINE	_DSS_INC
+
 ; DSS RST Entry
 DSS                 EQU 0x10
 
@@ -55,3 +58,12 @@ KB_R_SHIFT			EQU 0x40
 KB_L_SHIFT			EQU 0x80
 
 
+; File attributes
+FA_READONLY			EQU 0x01
+FA_HIDDEN			EQU 0x02
+FA_SYSTEM			EQU 0x04
+FA_LABEL			EQU 0x08
+FA_DIRECTORY		EQU 0x10
+FA_ARCHIVE			EQU 0x20
+
+	ENDIF 

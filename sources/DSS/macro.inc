@@ -5,10 +5,13 @@
 ; License: BSD 3-Clause
 ; ======================================================
 
+	IFNDEF	_MACRO
+	DEFINE	_MACRO
+
 	; Transmit data|command via UART and check response
 	MACRO	SEND_CMD	data
 	LD		HL, data
-	CALL	WIFI.UART_TX_CMD
+	CALL	@WIFI.UART_TX_CMD
 	CALL	CHECK_ERROR
 	ENDM	
 
@@ -47,3 +50,6 @@
 		ENDIF
 		RST		DSS
 	ENDM
+
+
+	ENDIF

@@ -4,6 +4,9 @@
 ; https://github.com/romychs
 ; ======================================================
 
+	IFNDEF	_SPRINTER
+	DEFINE	_SPRINTER
+
 ; Memory pages
 PAGE0_ADDR          EQU 0x0000
 PAGE1_ADDR          EQU 0x4000
@@ -30,3 +33,5 @@ CTC_CT_TRE			EQU 0x10							; 1 - Trigger Edge
 CTC_CT_PRE			EQU 0x20							; 1 - 256 Prescaler, 0 - 16
 CTC_CT_CTR			EQU 0x40							; 0 - Timer, 1 - Counter
 CTC_CT_EI			EQU 0x80							; Interrupt 1 - enable, 0 - disable
+
+	ENDIF

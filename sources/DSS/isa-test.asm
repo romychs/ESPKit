@@ -57,7 +57,8 @@ START
 		JP MAIN_LOOP
     ENDIF
 
-	
+	CALL	@WCOMMON.INIT_VMODE
+
     PRINTLN MSG_START
 
 	
@@ -79,12 +80,28 @@ START
 ; 	INC D
 
 	CALL	ISA.ISA_OPEN
-	LD	HL, PORT_UART_A
+
+	LD	HL, REG_SCR
 	LD  D,0x55
-L_AGAIN
-	.1000	LD	(HL), D
-	.1000	LD	D,(HL)	
-	JP L_AGAIN
+
+	LD		BC, PORT_ISA
+	LD		A, ISA_AEN							; AEN=1	 (for sync  LA by front)
+	OUT 	(C), A
+	
+	;
+	LD	(HL), D
+	LD	D,(HL)	
+
+	LD  D,0xAA
+	LD	(HL), D
+	LD	D,(HL)	
+
+	LD		BC, PORT_ISA
+	LD		A, 0								; AEN=0	
+	OUT 	(C), A
+
+	CALL	ISA.ISA_CLOSE
+
 
 	; --------- RESET & AEN --------------
 	; LD		BC, PORT_ISA
@@ -108,7 +125,7 @@ MAIN_LOOP
 
 OK_EXIT
 	LD		B,0
-	JP		WCOMMON.EXIT
+	JP		@WCOMMON.EXIT
 
 
 ; ------------------------------------------------------

@@ -169,7 +169,7 @@ _CLOSE_FILE
     JP      NORM_EXIT
 
 CUR_F_PTR
-    DW  ZIP_FILE
+    DW  IN_FILE
 
 REMAINS_IN_ZIP
     DW  0
@@ -192,7 +192,7 @@ _READ_FILE
     PUSH    HL                                          
 
     LD      HL, (CUR_F_PTR)                             ; HL -> IN ZIP_FILE
-    LD      DE, ZIP_FILE_END
+    LD      DE, IN_FILE_END
     EX      HL, DE
     SUB     HL, DE                                      ; HL = remain bytes
     LD      (REMAINS_IN_ZIP), HL
@@ -225,7 +225,7 @@ _WRITE_FILE
     
     PUSH    DE
     POP     BC
-    LD      DE,UNZIP_FILE
+    LD      DE,OUT_FILE
 
     PUSH    BC
     LDIR
@@ -279,7 +279,7 @@ _FIND_FIRST
 	LD 		HL, 33										; offset of file name
 	ADD 	HL, DE				
 	EX 		HL, DE
-	LD 		HL, ZIP_FILE_NAME
+	LD 		HL, IN_FILE_NAME
 	LD 		BC,9
 	LDIR
 	POP 	DE
@@ -360,13 +360,15 @@ _EXIT
     HALT
     JP _EXIT
 
-	
-ZIP_FILE_NAME
-	DB "file.zip",0
-ZIP_FILE
+CMD_LINE_TFTP_D
+	DB " tftp://tftp.server.ru:1024/file_in.asm  c:\\tmp\\file_out.asm"Z
+
+IN_FILE
 	DS 1024,0
-ZIP_FILE_END
-UNZIP_FILE
+IN_FILE_END
+IN_FILE_NAME
+	DB "infile.txt"
+OUT_FILE
 	DS 1024,0
 
     ALIGN 16384, 0

@@ -5,6 +5,12 @@
 ; License: BSD 3-Clause
 ; ======================================================
 
+	IFNDEF	_ISA_ASM
+	DEFINE	_ISA_ASM
+
+	INCLUDE "sprinter.inc"
+	INCLUDE "util.asm"
+
 PORT_ISA		EQU 0x9FBD
 PORT_SYSTEM		EQU 0x1FFD
 
@@ -29,11 +35,11 @@ ISA_RESET
 	LD		BC, PORT_ISA
 	LD		A,ISA_RST | ISA_AEN							; RESET=1 AEN=1	
 	OUT 	(C), A
-	CALL 	UTIL.DELAY_1MS
+	CALL 	@UTIL.DELAY_1MS
 	XOR 	A
 	OUT 	(C), A										; RESET=0 AEN=0
 	LD		HL,100
-	CALL 	UTIL.DELAY
+	CALL 	@UTIL.DELAY
 	RET
 
 ; ------------------------------------------------------
@@ -78,3 +84,5 @@ ISA_CLOSE
 SAVE_MMU3		DB	0									
 
 	ENDMODULE
+	
+	ENDIF

@@ -5,6 +5,10 @@
 ; License: BSD 3-Clause
 ; ======================================================
 
+
+	INCLUDE	"isa.asm"
+	INCLUDE "util.asm"
+
 ;ISA_BASE_A		EQU 0xC000        						; Базовый адрес портов ISA в памяти
 PORT_UART		EQU 0x03E8        						; Базовый номер порта COM3
 PORT_UART_A		EQU ISA_BASE_A + PORT_UART    			; Порты чипа UART в памяти 
@@ -101,6 +105,7 @@ _AFR 			EQU	2
 ; Find TL550C in ISA slot
 ; Out: CF=1 - Not found, CF=0 - ISA.ISA_SLOT found in slot
 ; ------------------------------------------------------
+	;IFUSED UART_FIND
 UART_FIND
 	PUSH	HL
 	XOR 	A
@@ -113,7 +118,6 @@ UART_FIND
 UF_T_FND
 	POP		HL
 	RET
-
 ; Test slot, A - ISA Slot no. 0 or 1
 UT_T_SLOT
 	; check IER hi bits, will be 0
@@ -137,12 +141,12 @@ CHK_SCR
 	CALL	UART_READ
 	CP		D
 	RET
-
-
+	;ENDIF
 
 ; ------------------------------------------------------
 ; Init UART device TL16C550
 ; ------------------------------------------------------
+	;IFUSED	UART_INIT
 UART_INIT
 	PUSH	AF, IX
 
@@ -166,41 +170,47 @@ UART_INIT
 
 	POP 	IX,AF
 	RET
+	;ENDIF
 
 ; ------------------------------------------------------
 ; Read TL16C550 register
 ;   Inp: HL - register
 ;   Out: A - value from register
 ; ------------------------------------------------------
+	;IFUSED	UART_READ
 UART_READ
 	CALL 	ISA.ISA_OPEN
 	LD 		A, (HL)
 	CALL 	ISA.ISA_CLOSE
 	RET
-
+	;ENDIF
 ; ------------------------------------------------------
 ; Write TL16C550 register
 ;   Inp: HL - register, E - value
 ; ------------------------------------------------------
+	;IFUSED	UART_WRITE
 UART_WRITE            
 	CALL	ISA.ISA_OPEN
 	LD 		(HL), E
 	CALL 	ISA.ISA_CLOSE
 	RET
-
+	;ENDIF
 ; ------------------------------------------------------
 ; Wait for transmitter ready
 ;   Out: CF=1 - tr not ready,  CF=0 ready
 ; ------------------------------------------------------
+	;IFUSED	UART_WAIT_TR
 UART_WAIT_TR
 	CALL	ISA.ISA_OPEN
 	CALL	UART_WAIT_TR_INT
 	CALL	ISA.ISA_CLOSE
 	RET
-
+	;ENDIF
 ;
 ; Wait, without open/close ISA
 ;
+	;IFUSED	UART_WAIT_TR_INT
+
 UART_WAIT_TR_INT
 	PUSH	BC, HL, DE
 	LD		D,A
@@ -210,7 +220,7 @@ WAIT_TR_BZY
 	LD 		A,(HL)
 	AND 	A, LSR_THRE
 	JR 		NZ,WAIT_TR_RDY
-	CALL	UTIL.DELAY_100uS							; ~11 bit tx delay
+	CALL	@UTIL.DELAY_100uS							; ~11 bit tx delay
 	DEC 	BC
 	LD 		A, C
 	OR		B	
@@ -220,12 +230,14 @@ WAIT_TR_RDY
 	LD		A,D
 	POP 	DE, HL, BC
 	RET
+	;ENDIF
 
 ; ------------------------------------------------------
 ; Transmit byte 
 ; Inp: E - byte
 ; Out: CF=1 - Not ready
 ; ------------------------------------------------------
+	;IFUSED	UART_TX_BYTE
 UART_TX_BYTE
 	PUSH	DE
 	CALL 	UART_WAIT_TR
@@ -236,12 +248,13 @@ UART_TX_BYTE
 UTB_NOT_R
 	POP		DE
 	RET
-
+	;ENDIF
 ; ------------------------------------------------------
 ;  Transmit buffer 
 ;	Inp: HL -> buffer, BC - size
 ;   Out: CF=0 - Ok, CF=1 - Timeout
 ; ------------------------------------------------------
+	;IFUSED	UART_TX_BUFFER
 UART_TX_BUFFER
 	PUSH	BC,DE,HL
 	LD		DE, REG_THR
@@ -267,12 +280,14 @@ UTX_TXNR
 	CALL	ISA.ISA_CLOSE
 	POP		HL,DE,BC
 	RET
+	;ENDIF
 
 ; ------------------------------------------------------
 ;  Transmit zero ended string
 ;	Inp: HL -> buffer
 ;   Out: CF=0 - Ok, CF=1 - Timeout
 ; ------------------------------------------------------
+	;IFUSED	UART_TX_STRING
 UART_TX_STRING
 	PUSH	DE,HL
 	LD		DE, REG_THR
@@ -296,13 +311,12 @@ UTXS_TXNR
 	CALL	ISA.ISA_CLOSE
 	POP		HL,DE
 	RET
-
-
-
+	;ENDIF
 
 ; ------------------------------------------------------
 ; Empty receiver FIFO buffer
 ; ------------------------------------------------------
+	;IFUSED	UART_EMPTY_RS
 UART_EMPTY_RS
 	PUSH 	DE, HL
 	LD 		E, FCR_TR8 | FCR_RESET_RX | FCR_FIFO
@@ -310,6 +324,7 @@ UART_EMPTY_RS
 	CALL	UART_WRITE
 	POP 	HL, DE
 	RET
+	;ENDIF
 
 ; ------------------------------------------------------
 ; Wait byte in receiver fifo
@@ -333,7 +348,7 @@ UVR_NEXT
 	OR		C
 	JR		NZ,UVR_NEXT
 UVR_TO
-    IF TRACE
+    IFDEF TRACE
 	PUSH	AF,BC,DE,HL
 	PRINTLN MSG_RCV_EMPTY
 	POP		HL,DE,BC,AF
@@ -342,10 +357,11 @@ UVR_TO
 UVR_OK
 	POP		HL,BC
 	RET
-	
+
 ; ------------------------------------------------------
 ; Reset ESP module
 ; ------------------------------------------------------
+	;IFUSED	ESP_RESET
 ESP_RESET
 	PUSH	AF,HL
 
@@ -365,17 +381,7 @@ ESP_RESET
 
 	POP		HL,AF
 	RET
-
-
-; Receive block size
-BSIZE		DW 0
-
-; Received message for OK result
-MSG_OK		DB "OK", 0
-; Received message for Error
-MSG_ERROR	DB "ERROR", 0
-; Received message for Failure
-MSG_FAIL	DB "FAIL", 0
+	;ENDIF
 
 ; ------------------------------------------------------
 ; UART TX Command
@@ -384,104 +390,122 @@ MSG_FAIL	DB "FAIL", 0
 ;		 BC - wait ms
 ;	Out: CF=1 if Error
 ; ------------------------------------------------------
+	;IFUSED	UART_TX_CMD
 UART_TX_CMD
-		PUSH	BC, DE, HL		
+	PUSH	BC, DE, HL		
 
-		LD		A, low RS_BUFF_SIZE
-		LD		(BSIZE), A
-		LD		A, high RS_BUFF_SIZE
-		LD		(BSIZE+1), A
+	LD		A, low RS_BUFF_SIZE
+	LD		(BSIZE), A
+	LD		A, high RS_BUFF_SIZE
+	LD		(BSIZE+1), A
 
-		;LD		(RESBUF),DE
-		XOR		A
-		LD		(DE), A
+	;LD		(RESBUF),DE
+	XOR		A
+	LD		(DE), A
 
-		LD		(WAIT_MS), BC
-		CALL	UART_EMPTY_RS
+	LD		(WAIT_MS), BC
+	CALL	UART_EMPTY_RS
 
-		; HL - Buffer, BC - Size
-		;CALL	UTIL.STRLEN
-		CALL	UART_TX_STRING
-		JR		NC, UTC_STRT_RX
-		; error, transmit timeout
-		LD		A, RES_TX_TIMEOUT
-		JR		UTC_RET
+	; HL - Buffer, BC - Size
+	;CALL	UTIL.STRLEN
+	CALL	UART_TX_STRING
+	JR		NC, UTC_STRT_RX
+	; error, transmit timeout
+	LD		A, RES_TX_TIMEOUT
+	JR		UTC_RET
 UTC_STRT_RX		
-		; no transmit timeout, receive response
-		; IX - pointer to begin of current line
-		LD		IXH, D
-		LD		IXL, E
-		LD		BC,(BSIZE)
+	; no transmit timeout, receive response
+	; IX - pointer to begin of current line
+	LD		IXH, D
+	LD		IXL, E
+	LD		BC,(BSIZE)
 UTC_RCV_NXT
-		; wait receiver ready
-		;LD		BC,(WAIT_MS)
-		CALL	UART_WAIT_RS1
-		JR		NC, UTC_NO_RT
-		; error, read timeout
-		LD		A, RES_RS_TIMEOUT
-		JR		UTC_RET
-		; no receive timeout
+	; wait receiver ready
+	;LD		BC,(WAIT_MS)
+	CALL	UART_WAIT_RS1
+	JR		NC, UTC_NO_RT
+	; error, read timeout
+	LD		A, RES_RS_TIMEOUT
+	JR		UTC_RET
+	; no receive timeout
 UTC_NO_RT
-
-		; read symbol from tty
-		LD		HL, REG_RBR
-		CALL	UART_READ
-		CP		CR
-		JP		Z, UTC_RCV_NXT							; Skip CR 
-		CP		LF
-		JR		Z, UTC_END								; LF - last symbol in responce
-		LD		(DE),A
-		INC		DE
-		DEC		BC
-		LD		A, B
-		OR		C
-		JR		NZ, UTC_RCV_NXT
-
+	; read symbol from tty
+	LD		HL, REG_RBR
+	CALL	UART_READ
+	CP		CR
+	JP		Z, UTC_RCV_NXT							; Skip CR 
+	CP		LF
+	JR		Z, UTC_END								; LF - last symbol in responce
+	LD		(DE),A
+	INC		DE
+	DEC		BC
+	LD		A, B
+	OR		C
+	JR		NZ, UTC_RCV_NXT
 UTC_END
-		XOR		A
-		LD		(DE),A									; temporary mark end of string
-		PUSH 	DE										; store DE
-		POP		IY
-		PUSH	IX
-		POP		DE										; DE - ptr to begin pf current line
+	XOR		A
+	LD		(DE),A									; temporary mark end of string
+	PUSH 	DE										; store DE
+	POP		IY
+	PUSH	IX
+	POP		DE										; DE - ptr to begin pf current line
 
-		; It is 'OK<LF>'?
-		LD		HL, MSG_OK
-		CALL	UTIL.STRCMP
-		JR		NC, UTC_RET
-		; It is 'ERROR<LF>'?
-		LD		HL,MSG_ERROR
-		CALL	UTIL.STRCMP
-		JR		C, UTC_CP_FAIL
-		LD		A, RES_ERROR
-		; It is 'FAIL<LF>'?
-		JR		UTC_RET
+	; It is 'OK<LF>'?
+	LD		HL, MSG_OK
+	CALL	UTIL.STRCMP
+	JR		NC, UTC_RET
+	; It is 'ERROR<LF>'?
+	LD		HL,MSG_ERROR
+	CALL	UTIL.STRCMP
+	JR		C, UTC_CP_FAIL
+	LD		A, RES_ERROR
+	; It is 'FAIL<LF>'?
+	JR		UTC_RET
 UTC_CP_FAIL		
-		LD		HL,MSG_FAIL
-		CALL	UTIL.STRCMP
-		JR		C, UTC_NOMSG
-		LD		A, RES_FAIL
-		JR		UTC_RET
+	LD		HL,MSG_FAIL
+	CALL	@UTIL.STRCMP
+	JR		C, UTC_NOMSG
+	LD		A, RES_FAIL
+	JR		UTC_RET
 UTC_NOMSG
-		; no resp message, continue receive
-		PUSH	IY
-		POP		DE
-		LD		A, LF
-		LD		(DE),A									; change 0 - EOL to LF
-		INC		DE
-		LD		IXH,D									; store new start line ptr
-		LD		IXL,E
-		JR		UTC_RCV_NXT
+	; no resp message, continue receive
+	PUSH	IY
+	POP		DE
+	LD		A, LF
+	LD		(DE),A									; change 0 - EOL to LF
+	INC		DE
+	LD		IXH,D									; store new start line ptr
+	LD		IXL,E
+	JR		UTC_RCV_NXT
 UTC_RET
-		POP		HL, DE, BC
-		RET
+	POP		HL, DE, BC
+	RET
+	;ENDIF
 
-	IF TRACE
+	IFDEF TRACE
 MSG_RCV_EMPTY
 	DB "Receiver is empty!",0	
 	ENDIF
 
+; ------------------------------------------------------
+; Data definition
+; ------------------------------------------------------
+
+; Receive block size
+BSIZE		DW 0
+
+; Received message for OK result
+MSG_OK		DB "OK", 0
+
+; Received message for Error
+MSG_ERROR	DB "ERROR", 0
+
+; Received message for Failure
+MSG_FAIL	DB "FAIL", 0
+
+	IFUSED RS_BUFF
 ; Buffer to receive response from ESP
 RS_BUFF	DS RS_BUFF_SIZE, 0
+	ENDIF
 
 	ENDMODULE

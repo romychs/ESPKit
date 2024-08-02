@@ -53,7 +53,7 @@
             },
             "group": {
                 "kind": "build",
-                "isDefault": true
+                "isDefault": false
             }
         },
 
@@ -82,6 +82,63 @@
             "group": {
                 "kind": "build",
                 "isDefault": false
+            }
+        },
+
+        {
+            "label": "make ESPLIB (sjasmplus)",
+            "type": "shell",
+            "command": "sjasmplus",
+            "args": [
+                "--sld=esplib.sld",
+                "--sym=esplib.labels",
+                "--raw=esplib.exe",
+                "--fullpath",
+                "esplib.asm"
+            ],
+            "problemMatcher": {
+                "owner": "sjasmplus",
+                "fileLocation": "autoDetect",
+                "pattern": {
+                    "regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+
+
+        {
+            "label": "make WTFTP (sjasmplus)",
+            "type": "shell",
+            "command": "sjasmplus",
+            "args": [
+                "--sld=wtftp.sld",
+                "--sym=wtftp.labels",
+                "--raw=wtftp.exe",
+                "--fullpath",
+                "wtftp.asm"
+            ],
+            "problemMatcher": {
+                "owner": "sjasmplus",
+                "fileLocation": "autoDetect",
+                "pattern": {
+                    "regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
             }
         },
 
