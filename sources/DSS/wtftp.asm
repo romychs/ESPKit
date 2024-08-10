@@ -8,14 +8,13 @@
 
 ; Set to 1 to turn debug ON with DeZog VSCode plugin
 ; Set to 0 to compile .EXE
-	DEFINE			DEBUG
+;	DEFINE			DEBUG
 
 ; Set to 1 to output TRACE messages
 	DEFINE 			TRACE
 
 
 WM_DOWNLOAD			EQU 0
-
 WM_UPLOAD			EQU 1
 
 
@@ -67,17 +66,29 @@ START
 		LD		SP, STACK_TOP		
     ENDIF
 	
+	PRINTLN MSG_START
+	
 	CALL	PARSE_CMD_LINE
 
-	CALL	OPEN_LOCAL_FILE
-	
 	CALL	DISPLAY_MODE
 
+	CALL	OPEN_LOCAL_FILE
+
+	IF_UPLOAD_GO DO_UPLOAD
+	CALL	@TFTP.BUILD_RRQ_PACKET
+	JP		DONE
+
+DO_UPLOAD
+	CALL	@TFTP.BUILD_WRQ_PACKET
+
+DONE
 	CALL	CLOSE_LOCAL_FILE
 
-	IFDEF	DEBUG
-		JP 		MAIN_LOOP
-	ENDIF
+	;IFDEF	DEBUG
+	LD		B,0
+	DSS_EXEC	DSS_EXIT
+
+	;ENDIF
 
 	CALL 	ISA.ISA_RESET
 	
@@ -113,16 +124,17 @@ OK_EXIT
 ; IX - points to cmd line
 ; ------------------------------------------------------
 PARSE_CMD_LINE
-	PUSH 	IX
-	POP		HL
-	LD		A,(HL)
+	PUSH 	IX								
+	POP		HL											; HL -> CMD Line
+	LD		A,(HL)										; CMD Line length
 	OR		A
 	JR		Z, OUT_USAGE_MSG
-	CALL	SKIP_SPACES
+	INC		HL											; skip length byte
+	CALL	@UTIL.LTRIM									; skip leading non-printable characters
 
 	
 	; check first parameter for tftp url pattern
-	LD		DE,TFTF_START
+	LD		DE,TFTF_START								; check parameter to start from 'tftp://'
 	CALL	@UTIL.STARTSWITH
 	JR		NZ,.PLC_UPLOAD
 
@@ -130,7 +142,7 @@ PARSE_CMD_LINE
 
 	; handle parameter URL
 	CALL	GET_SRV_PARAMS
-	CALL	SKIP_SPACES
+	CALL	@UTIL.LTRIM									; skip spaces between parameters
     
 	; handle lfn
 	CALL	GET_LFN
@@ -143,7 +155,7 @@ PARSE_CMD_LINE
 	LD		(WORK_MODE),A
 
 	CALL	GET_LFN
-	CALL	SKIP_SPACES
+	CALL	@UTIL.LTRIM
 
 	LD		DE,TFTF_START
 	CALL	@UTIL.STARTSWITH
@@ -308,6 +320,7 @@ COPY_LFN
 	INC		(IX+0)
 			
 	LD		DE,REM_FILE
+	LD		B,12										; limit filename length nnnnnnnn.exe
 .CLFN_NXT	
 	LD		A,(DE)
 	LD		(HL),A
@@ -315,10 +328,7 @@ COPY_LFN
 	RET		Z
 	INC		HL
 	INC		DE
-	JR		.CLFN_NXT
-
-
-
+	DJNZ	.CLFN_NXT
 
 ; ------------------------------------------------------
 ; Open local file for upload or download
@@ -331,8 +341,8 @@ OPEN_LOCAL_FILE
 	OR		A
 	JR		NZ,.OLF_SKP_CP
 	
-	LD		HL, WIFI.RS_BUFF
-	PUSH	HL
+	LD		HL, @TMP_BUFF
+	;PUSH	HL
 	CALL	UTIL.GET_CUR_DIR
 	LD		DE,LOC_FILE
 	LD		B,128
@@ -345,25 +355,41 @@ OPEN_LOCAL_FILE
 	INC		DE
 	DJNZ	.OLF_NXT	
 .OLF_EFN
-	POP		HL
+	LD		HL, @TMP_BUFF
+	;POP		HL
 
 	; HL - points to file path name
 .OLF_SKP_CP
-	LD		A, (WORK_MODE)
-	CP		WM_UPLOAD
-	JR		Z,.OLF_UPL
+	IF_UPLOAD_GO .OLF_UPL
 
 	; create new file for write
-	XOR		A
+	PUSH	HL, HL
+	PRINT	MSG_LFN_CR
+	POP		HL
+	CALL	PRINT_FILENAME
+	POP		HL
+
+	XOR		A	
+	PUSH 	HL
 	LD		C,DSS_CREATE_FILE
 	RST		DSS
+	POP		HL
 	JR		NC,.OLF_END
 	CP		0x07										; file exists?
 	JP		NZ,DSS_ERROR.PRINT							; print error and exit
+	PUSH	HL
+	PRINTLN	MSG_OF_EXISTS
+	POP		HL
 	LD		A,FM_WRITE
 	JR		.OLF_FOW
+
 	; open existing file for read
 .OLF_UPL
+	PUSH	HL, HL
+	PRINT	MSG_LFN_OP
+	POP 	HL
+	CALL    PRINT_FILENAME
+	POP		HL
 	LD		A,FM_READ
 .OLF_FOW	
 	LD		C,DSS_OPEN_FILE
@@ -376,11 +402,28 @@ OPEN_LOCAL_FILE
 
 	RET
 
+PRINT_FILENAME
+	DSS_EXEC DSS_PCHARS
+	PRINTLN WCOMMON.LINE_END
+	RET
+
+
+MSG_OF_EXISTS
+	DB	"Output file already exists!"Z
+	
 	IFDEF	TRACE
+MSG_LFN_CR
+    DB	"Create file: "Z	
+MSG_LFN_OP
+    DB	"Open file: "Z	
 MSG_LFN_OPEN
-	DB "Local file succes open/created."Z	
+	DB	"File successfully accessed."Z	
 	ENDIF
 
+
+; ------------------------------------------------------
+; Closes loacal file if it open
+; ------------------------------------------------------
 CLOSE_LOCAL_FILE
 	LD		A,(LOC_FH)	
 	OR		A
@@ -389,28 +432,13 @@ CLOSE_LOCAL_FILE
 	CALL	DSS_ERROR.CHECK
 	RET
 
-; ------------------------------------------------------
-; Skip spaces at start of zero ended string
-; Inp: HL - pointer to string
-; Out: HL - points to first non space symbol
-; ------------------------------------------------------
-SKIP_SPACES
-	LD	A, (HL)
-	OR	A
-	RET Z
-	CP  0x21
-	RET P
-	INC HL
-	JR	SKIP_SPACES
 
 
 ; ------------------------------------------------------
 ; Display current working mode
 ; ------------------------------------------------------
 DISPLAY_MODE
-	LD	A,(WORK_MODE)
-	CP  A,WM_UPLOAD
-	JR	.DM_UPLOAD
+	IF_UPLOAD_GO .DM_UPLOAD
 	; Download
 	PRINT MSG_MODE_D
 	PRINT REM_FILE
@@ -429,20 +457,6 @@ DISPLAY_MODE
 	PRINTLN REM_FILE
 	RET
 
-MSG_MODE_D
-	DB "Download file "Z
-MSG_MODE_D_S
-	DB " from server "Z
-MSG_MODE_D_T
-	DB " to file "Z
-
-MSG_MODE_U
-	DB "Upload file "Z
-MSG_MODE_U_S
-	DB " to server "Z
-MSG_MODE_U_T
-	DB " to file "Z
-
 ; ------------------------------------------------------
 ; Custom messages
 ; ------------------------------------------------------
@@ -454,8 +468,8 @@ MSG_ERR_CMD
 	DB "Invalid command line parameters!\r\n"Z
 
 MSG_HLP
-	DB "\r\nUse: wtftp.exe tftp://server[:port]/filename filename  - to download file from server;\r\n"
-	DB "     wtftp.exe filename tftp://server[:port]/filename  - to upload file to server.\r\n"Z
+	DB "\r\nUse:\r\n  wtftp.exe tftp://server[:port]/filename filename  - to download from server;\r\n"
+	DB "  wtftp.exe filename tftp://server[:port]/filename  - to upload to server.\r\n"Z
 
 MSG_TX_ERROR
 	DB "Transmitter not ready"Z
@@ -477,6 +491,24 @@ MSG_ERR_RFN
 MSG_ERR_LFN
     DB "Invalid local file name!"Z
 
+MSG_MODE_D
+	DB "Download file "Z
+MSG_MODE_D_S
+	DB " from server "Z
+MSG_MODE_D_T
+	DB " to file "Z
+
+MSG_MODE_U
+	DB "Upload file "Z
+MSG_MODE_U_S
+	DB " to server "Z
+MSG_MODE_U_T
+	DB " to file "Z
+
+; ------------------------------------------------------
+; Variables
+; ------------------------------------------------------
+
 ; Start of tftf URL
 TFTF_START
 	DB "tftp://"Z
@@ -489,12 +521,12 @@ WORK_MODE
 ; Name/IP of the tftp server
 SRV_NAME
 	DS 128,0
-
+CMDLINE
 ; UDP port of the tftp server
 SRV_PORT
 	DB 69,0,0,0,0,0										; udp port number 0..65535
 
-; Name of the source file
+; Name of the remote file
 REM_FILE
 	DS 128,0
 
@@ -506,28 +538,23 @@ LOC_FILE
 LOC_FH
 	DW	0
 
-; Not null if local file name contains path
+; Non zero, if local file name contains path
 HAVE_PATH
 	DB	0
 
-; ------------------------------------------------------
-; Custom commands
-; ------------------------------------------------------
-RX_ERR
-	DB 0
-
-; 	IFDEF	DEBUG
-; CMD_TEST1	DB "ATE0\r\n"Z
-; BUFF_TEST1	DS RS_BUFF_SIZE,0
-; 	ENDIF
-
 	ENDMODULE
+; ------------------------------------------------------
+; Includes
+; ------------------------------------------------------
 
 	INCLUDE "wcommon.asm"
 	INCLUDE "dss_error.asm"
 	;INCLUDE "util.asm"
 	INCLUDE "isa.asm"
+	INCLUDE "tftp.asm"
 	INCLUDE "esplib.asm"
 
+
+TMP_BUFF
 
     END MAIN.START

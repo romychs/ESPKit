@@ -41,7 +41,7 @@ RST38:
 
 DSS_HANDLER
     
-    PUSH    HL
+    //PUSH    HL
     PUSH    BC
     LD      A, C
     CP      DSS_CURDISK
@@ -119,13 +119,13 @@ NXT_PCHAR
 NORM_EXIT
 	AND A												; CF=0
     POP BC
-    POP HL    
+    //POP HL    
     RET
 
 BAD_EXIT
     SCF
     POP BC
-    POP HL    
+    //POP HL    
     RET
 
 
@@ -364,10 +364,10 @@ CMD_LINE_TFTP_D
 	DB " tftp://tftp.server.ru:1024/file_in.asm  c:\\tmp\\file_out.asm"Z
 
 CMD_LINE_TFTP_D1
-	DB " tftp://tftp.server.ru:1024/file_in.asm local.asm"Z
+	DB " tftp://server.ru/file.src sss.dst"Z
 
 CMD_LINE_TFTP_U
-	DB " file_up.txt tftp://tftp.server.ru:9999/file_in.asm "Z
+	DB " file_from.asm tftp://server.ru:9999/file_to.asm"Z
 
 CMD_LINE_TFTP_U1
 	DB " file_up.txt"Z

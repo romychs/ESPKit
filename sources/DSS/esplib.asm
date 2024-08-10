@@ -503,9 +503,8 @@ MSG_ERROR	DB "ERROR", 0
 ; Received message for Failure
 MSG_FAIL	DB "FAIL", 0
 
-	IFUSED RS_BUFF
 ; Buffer to receive response from ESP
-RS_BUFF	DS RS_BUFF_SIZE, 0
-	ENDIF
+RS_BUFF	
+	;DS RS_BUFF_SIZE, 0
 
 	ENDMODULE

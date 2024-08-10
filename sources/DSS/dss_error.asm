@@ -13,6 +13,9 @@ CHECK
 	RET		NC
 
 PRINT
+	PUSH	AF
+	PRINT	GET_ERR_MSG.MSG_DSS_ERROR
+	POP		AF
 	CALL	GET_ERR_MSG
 	DSS_EXEC	DSS_PCHARS
 	LD		HL, WCOMMON.LINE_END
@@ -42,6 +45,9 @@ GET_ERR_MSG
     LD      L,A
 	POP		AF
 	RET
+
+.MSG_DSS_ERROR
+			DB " Error: "Z
 
 .MSG_E01	DB	"Invalid function"Z
 .MSG_E02	DB	"Invalid drive number"Z

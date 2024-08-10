@@ -142,6 +142,36 @@
             }
         },
 
+        {
+            "label": "make CMDTEST (sjasmplus)",
+            "type": "shell",
+            "command": "sjasmplus",
+            "args": [
+                "--sld=cmdtest.sld",
+                "--sym=cmdtest.labels",
+                "--raw=cmdtest.exe",
+                "--fullpath",
+                "cmdtest.asm"
+            ],
+            "problemMatcher": {
+                "owner": "sjasmplus",
+                "fileLocation": "autoDetect",
+                "pattern": {
+                    "regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+
+
+
 		{
             "label": "start mame",
             "type": "shell",
