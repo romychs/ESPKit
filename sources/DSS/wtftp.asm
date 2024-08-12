@@ -8,7 +8,7 @@
 
 ; Set to 1 to turn debug ON with DeZog VSCode plugin
 ; Set to 0 to compile .EXE
-;	DEFINE			DEBUG
+	DEFINE			DEBUG
 
 ; Set to 1 to output TRACE messages
 	DEFINE 			TRACE
@@ -62,7 +62,7 @@ EXE_HEADER
 START
 	
     IFDEF DEBUG
-    	LD 		IX,CMD_LINE_TFTP_D1
+    	LD 		IX,CMD_LINE_TFTP_U
 		LD		SP, STACK_TOP		
     ENDIF
 	
@@ -121,6 +121,7 @@ OK_EXIT
 	JP		WCOMMON.EXIT
 
 ; ------------------------------------------------------
+; Parse command line parameters
 ; IX - points to cmd line
 ; ------------------------------------------------------
 PARSE_CMD_LINE
@@ -173,7 +174,6 @@ OUT_ERR_CMD_MSG
 OUT_USAGE_MSG
 	PRINTLN	MSG_HLP
 	JP		OK_EXIT
-
 
 ; ------------------------------------------------------
 ; Move srv name and port number from (HL) to (DE)
@@ -237,8 +237,6 @@ GET_SRV_PARAMS
 .GDNF_NXT	
 	INC		HL
 	LD		A,(HL)
-;	OR		A
-;	JR		Z,.GDNF_END
 	CP		0x21
 	JP		M,.GDNF_END
 	LD		(DE),A
@@ -261,8 +259,8 @@ GET_SRV_PARAMS
 	RET
 
 ; ------------------------------------------------------
-; Get local file name from command string
-;
+; Get local file name from command line
+; Inp: HL -> command line
 ; ------------------------------------------------------
 GET_LFN
 	PUSH	BC,DE
@@ -342,7 +340,6 @@ OPEN_LOCAL_FILE
 	JR		NZ,.OLF_SKP_CP
 	
 	LD		HL, @TMP_BUFF
-	;PUSH	HL
 	CALL	UTIL.GET_CUR_DIR
 	LD		DE,LOC_FILE
 	LD		B,128
@@ -356,7 +353,6 @@ OPEN_LOCAL_FILE
 	DJNZ	.OLF_NXT	
 .OLF_EFN
 	LD		HL, @TMP_BUFF
-	;POP		HL
 
 	; HL - points to file path name
 .OLF_SKP_CP
@@ -431,8 +427,6 @@ CLOSE_LOCAL_FILE
 	DSS_EXEC	DSS_CLOSE_FILE
 	CALL	DSS_ERROR.CHECK
 	RET
-
-
 
 ; ------------------------------------------------------
 ; Display current working mode

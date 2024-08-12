@@ -8,19 +8,19 @@
 	MODULE TFTP
 
 ; ------------------------------------------------------
-; Operation codes 2b for tftp packet header
+; Operation codes 2b for tftp packet header  (bytes swapped)
 ; ------------------------------------------------------
 
 ; Opcode Read Request
-OP_RRQ		EQU '01'
+OP_RRQ		EQU '10'
 ; Opcode Write Request
-OP_WRQ		EQU	'02'
+OP_WRQ		EQU	'20'
 ; Opcode Data packet
-OP_DATA		EQU '03'
+OP_DATA		EQU '30'
 ; Opcode Acknowledge packet
-OP_ACK		EQU '04'
+OP_ACK		EQU '40'
 ; Opcode Error packet
-OP_ERROR	EQU '05'
+OP_ERROR	EQU '50'
 
 ; ------------------------------------------------------
 ; Build packet for request file from TFTF-server
@@ -30,7 +30,7 @@ BUILD_RRQ_PACKET
 	PUSH	DE
 	LD		DE,OP_RRQ									; opcode
 	CALL	.BUILD_RW_PACKET
-	POP		HL,DE
+	POP		DE
 	RET
 
 ; ------------------------------------------------------
@@ -40,15 +40,14 @@ BUILD_RRQ_PACKET
 	PUSH	DE
 	LD		DE,OP_WRQ									; opcode
 	CALL	.BUILD_RW_PACKET
-	POP		HL,DE
+	POP		DE
 	RET
 
 ; ------------------------------------------------------
 ; Build packet for write file or receive form TFTF-server
 ; ------------------------------------------------------
-.BUILD_RW_PACKET	
+.BUILD_RW_PACKET
 	LD		HL,TFTP_BUFF
-	PUSH	HL
 	LD		(HL), DE
 	INC		HL
 	INC		HL
@@ -65,13 +64,23 @@ BUILD_RRQ_PACKET
 	; Mode 'octet'Z
 .BRP_MOD
 	INC 	HL
-	LD		DE,'ct'
+	LD		DE,'co'
 	LD		(HL),DE
+	INC 	HL
 	INC 	HL
 	LD		DE,'et'
 	LD		(HL),DE
 	INC 	HL
+	INC 	HL
 	LD		DE,'t'
+	LD		(HL),DE
+	INC 	HL
+	INC 	HL
+	; Calculate packet length
+	LD		DE, TFTP_BUFF
+	SBC		HL,DE
+	EX		DE,HL
+	LD		HL,TFTF_PACKET_LEN
 	LD		(HL),DE
 	RET
 
@@ -157,6 +166,8 @@ CHK_ERROR
 	DB "Unknown TFTP packet received!"Z
 
 ; Buffer for UDP datagram with TFTP payload
+TFTF_PACKET_LEN
+	DW 0
 TFTP_BUFF
 	DS 516,0
 
