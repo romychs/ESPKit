@@ -205,11 +205,11 @@ GET_SRV_PARAMS
 .GSNP_NXT	
 	INC		HL											
 	LD		A,(HL)
-	CP		A,'/'										; end slash
+	CP		'/'											; end slash
 	JR		Z,.GSN_EN
-	CP		A,'0'
+	CP		'0'
 	JP		M,.GSN_EPN
-	CP		A,0x3A										; >'9'?
+	CP		0x3A										; >'9'?
 	JP		P,.GSN_EPN
 	LD		(DE),A
 	INC		DE
@@ -555,4 +555,4 @@ TMP_BUFF EQU WIFI.RS_BUFF + RS_BUFF_SIZE
 
 
 
-    END MAIN.START
+    END ;MAIN.START

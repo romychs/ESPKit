@@ -23,7 +23,7 @@ EPRINT
 	DSS_EXEC	DSS_PCHARS
 	LD		HL, WCOMMON.LINE_END
     DSS_EXEC	DSS_PCHARS
-	POP 	BC											; clear add from stack
+	POP 	BC											; clear addr from stack
 	DSS_EXEC	0x0200+DSS_EXIT							; and exit
 
 ; ------------------------------------------------------

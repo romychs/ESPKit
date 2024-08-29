@@ -165,9 +165,10 @@ CHK_ERROR
 .MSG_ERR_UPT
 	DB "Unknown TFTP packet received!",0
 
-; Buffer for UDP datagram with TFTP payload
+; Length of TFTP packet
 TFTF_PACKET_LEN
 	DW 0
+; Buffer for UDP datagram with TFTP payload
 TFTP_BUFF
 	DS 516,0
 
