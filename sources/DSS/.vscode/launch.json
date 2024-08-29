@@ -175,7 +175,7 @@
             "name": "WTFTP Internal Simulator",
             "remoteType": "zsim",
             "zsim": {
-                "visualMemory": true,
+                "visualMemory": false,
                 "memoryModel": "CUSTOM",
                 "customMemory": {
                     "slots": [

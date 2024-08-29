@@ -1,7 +1,7 @@
 DSS			EQU 0x10
 DSS_PCHARS	EQU 0x5C
 DSS_EXIT	EQU 0x41
-EXE_VERSION EQU 0x00
+EXE_VERSION EQU 0x01
 
 
 	; Print data ASCIIZ string to screen and CR+LF
@@ -41,6 +41,7 @@ START
 	PRINTLN MSG_CMDLINE
 	PUSH	IX
 	POP		HL
+	INC		HL
     LD      C,DSS_PCHARS
     RST     DSS
 
@@ -58,7 +59,7 @@ MSG_CMDLINE
 	DB "\r\nCommandline:"Z
 
 MSG_CURPATH
-	DB "\r\nCurrentPath:"Z
+	DB "\r\nExePath:"Z
 
 MSG_LINE_END
 	DB "\r\n"Z	
