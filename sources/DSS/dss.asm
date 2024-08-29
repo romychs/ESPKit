@@ -3,6 +3,8 @@
 ; By Roman Boykov. Copyright (c) 2024
 ; https://github.com/romychs
 ; ======================================================
+	IFNDEF	_DSS
+	DEFINE	_DSS
 
     ORG 0x0000
 
@@ -187,8 +189,8 @@ REMAINS_IN_ZIP
 _READ_FILE
     OR      A
     JP	    Z, BAD_EXIT
-    PUSH    DE
-    POP     BC                                          ; BC - bytes to read
+	LD		B,D											; BC - bytes to read
+	LD		C,E
     PUSH    HL                                          
 
     LD      HL, (CUR_F_PTR)                             ; HL -> IN ZIP_FILE
@@ -223,8 +225,8 @@ NO_OUT_OF_ZIP
 ; DE - реальное количество записанных байт
 _WRITE_FILE
     
-    PUSH    DE
-    POP     BC
+	LD		B, D
+	LD		C, E
     LD      DE,OUT_FILE
 
     PUSH    BC
@@ -304,9 +306,9 @@ _SCANKEY
 _WAITKEY
 	XOR		A
 	LD		D, A
-	LD		C, A
+	;LD		C, A
 	LD		E,65
-	LD		A,65
+	LD		A,E
     JP      NORM_EXIT
 
 
@@ -361,16 +363,16 @@ _EXIT
     JP _EXIT
 
 CMD_LINE_TFTP_D
-	DB " tftp://tftp.server.ru:1024/file_in.asm  c:\\tmp\\file_out.asm"Z
+	DB " tftp://tftp.server.ru:1024/file_in.asm  c:\\tmp\\file_out.asm",0
 
 CMD_LINE_TFTP_D1
-	DB " tftp://server.ru/file.src sss.dst"Z
+	DB " tftp://server.ru/file.src sss.dst",0
 
 CMD_LINE_TFTP_U
-	DB " file_from.asm tftp://server.ru:9999/file_to.asm"Z
+	DB " file_from.asm tftp://server.ru:9999/file_to.asm",0
 
 CMD_LINE_TFTP_U1
-	DB " file_up.txt"Z
+	DB " file_up.txt",0
 
 
 IN_FILE
@@ -382,3 +384,5 @@ OUT_FILE
 	DS 1024,0
 
     ALIGN 16384, 0
+
+	ENDIF

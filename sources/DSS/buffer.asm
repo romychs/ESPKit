@@ -3,6 +3,8 @@
 ; By Roman Boykov. Copyright (c) 2024
 ; https://github.com/romychs
 ; ======================================================
+	IFNDEF	_BUFFER
+	DEFINE	_BUFFER
 	
 	MODULE BUFFER
 
@@ -187,3 +189,5 @@ SAVE_P1
 RX_BUFFER
 
 	ENDMODULE
+
+	ENDIF

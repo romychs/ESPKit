@@ -1,185 +1,203 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "make ESPSET (sjasmplus)",
-            "type": "shell",
-            "command": "sjasmplus",
-            "args": [
-                "--sld=espset.sld",
-                "--sym=espset.labels",
-                "--raw=espset.exe",
-                "--fullpath",
-                "espset.asm"
-            ],
-            "problemMatcher": {
-                "owner": "sjasmplus",
-                "fileLocation": "autoDetect",
-                "pattern": {
-                    "regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
-                    "file": 1,
-                    "line": 2,
-                    "severity": 3,
-                    "message": 4
-                }
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            }
-        },
- 
+	"version": "2.0.0",
+	"tasks": [
 		{
-            "label": "make WTERM (sjasmplus)",
-            "type": "shell",
-            "command": "sjasmplus",
-            "args": [
-                "--sld=wterm.sld",
-                "--sym=wterm.labels",
-                "--raw=wterm.exe",
-                "--fullpath",
-                "wterm.asm"
-            ],
-            "problemMatcher": {
-                "owner": "sjasmplus",
-                "fileLocation": "autoDetect",
-                "pattern": {
-                    "regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
-                    "file": 1,
-                    "line": 2,
-                    "severity": 3,
-                    "message": 4
-                }
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            }
-        },
-
+			"label": "make ESPSET (sjasmplus)",
+			"type": "shell",
+			"command": "sjasmplus",
+			"args": [
+				"--sld=espset.sld",
+				"--sym=espset.labels",
+				"--raw=espset.exe",
+				"--fullpath",
+				"espset.asm"
+			],
+			"problemMatcher": {
+				"owner": "sjasmplus",
+				"fileLocation": "autoDetect",
+				"pattern": {
+					"regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
+					"file": 1,
+					"line": 2,
+					"severity": 3,
+					"message": 4
+				}
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			}
+		},
 		{
-            "label": "make ISA-TEST (sjasmplus)",
-            "type": "shell",
-            "command": "sjasmplus",
-            "args": [
-                "--sld=isa-test.sld",
-                "--sym=isa-test.labels",
-                "--raw=isa-test.exe",
-                "--fullpath",
-                "isa-test.asm"
-            ],
-            "problemMatcher": {
-                "owner": "sjasmplus",
-                "fileLocation": "autoDetect",
-                "pattern": {
-                    "regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
-                    "file": 1,
-                    "line": 2,
-                    "severity": 3,
-                    "message": 4
-                }
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            }
-        },
-
-        {
-            "label": "make ESPLIB (sjasmplus)",
-            "type": "shell",
-            "command": "sjasmplus",
-            "args": [
-                "--sld=esplib.sld",
-                "--sym=esplib.labels",
-                "--raw=esplib.exe",
-                "--fullpath",
-                "esplib.asm"
-            ],
-            "problemMatcher": {
-                "owner": "sjasmplus",
-                "fileLocation": "autoDetect",
-                "pattern": {
-                    "regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
-                    "file": 1,
-                    "line": 2,
-                    "severity": 3,
-                    "message": 4
-                }
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            }
-        },
-
-
-        {
-            "label": "make WTFTP (sjasmplus)",
-            "type": "shell",
-            "command": "sjasmplus",
-            "args": [
-                "--sld=wtftp.sld",
-                "--sym=wtftp.labels",
-                "--raw=wtftp.exe",
-                "--fullpath",
-                "wtftp.asm"
-            ],
-            "problemMatcher": {
-                "owner": "sjasmplus",
-                "fileLocation": "autoDetect",
-                "pattern": {
-                    "regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
-                    "file": 1,
-                    "line": 2,
-                    "severity": 3,
-                    "message": 4
-                }
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-
-        {
-            "label": "make CMDTEST (sjasmplus)",
-            "type": "shell",
-            "command": "sjasmplus",
-            "args": [
-                "--sld=cmdtest.sld",
-                "--sym=cmdtest.labels",
-                "--raw=cmdtest.exe",
-                "--fullpath",
-                "cmdtest.asm"
-            ],
-            "problemMatcher": {
-                "owner": "sjasmplus",
-                "fileLocation": "autoDetect",
-                "pattern": {
-                    "regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
-                    "file": 1,
-                    "line": 2,
-                    "severity": 3,
-                    "message": 4
-                }
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            }
-        },
-
-
-
+			"label": "make WTERM (sjasmplus)",
+			"type": "shell",
+			"command": "sjasmplus",
+			"args": [
+				"--sld=wterm.sld",
+				"--sym=wterm.labels",
+				"--raw=wterm.exe",
+				"--fullpath",
+				"wterm.asm"
+			],
+			"problemMatcher": {
+				"owner": "sjasmplus",
+				"fileLocation": "autoDetect",
+				"pattern": {
+					"regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
+					"file": 1,
+					"line": 2,
+					"severity": 3,
+					"message": 4
+				}
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			}
+		},
 		{
-            "label": "start mame",
-            "type": "shell",
-            "command": "while true; do ./mame spectrum -window -debugger gdbstub -debug -debugger_port 12000 -verbose -resolution 512x384 ; sleep 2 ; done",
-            "options": {
-                "cwd": "${config:mame_dir}"
-            },
-            "problemMatcher": []
-        }
-    ]
+			"label": "make ISA-TEST (sjasmplus)",
+			"type": "shell",
+			"command": "sjasmplus",
+			"args": [
+				"--sld=isa-test.sld",
+				"--sym=isa-test.labels",
+				"--raw=isa-test.exe",
+				"--fullpath",
+				"isa-test.asm"
+			],
+			"problemMatcher": {
+				"owner": "sjasmplus",
+				"fileLocation": "autoDetect",
+				"pattern": {
+					"regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
+					"file": 1,
+					"line": 2,
+					"severity": 3,
+					"message": 4
+				}
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			}
+		},
+		{
+			"label": "make ESPLIB (sjasmplus)",
+			"type": "shell",
+			"command": "sjasmplus",
+			"args": [
+				"--sld=esplib.sld",
+				"--sym=esplib.labels",
+				"--raw=esplib.exe",
+				"--fullpath",
+				"esplib.asm"
+			],
+			"problemMatcher": {
+				"owner": "sjasmplus",
+				"fileLocation": "autoDetect",
+				"pattern": {
+					"regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
+					"file": 1,
+					"line": 2,
+					"severity": 3,
+					"message": 4
+				}
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			}
+		},
+		{
+			"label": "make WTFTP (sjasmplus)",
+			"type": "shell",
+			"command": "sjasmplus",
+			"args": [
+				"--sld=wtftp.sld",
+				"--sym=wtftp.labels",
+				"--raw=wtftp.exe",
+				"--fullpath",
+				"wtftp.asm"
+			],
+			"problemMatcher": {
+				"owner": "sjasmplus",
+				"fileLocation": "autoDetect",
+				"pattern": {
+					"regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
+					"file": 1,
+					"line": 2,
+					"severity": 3,
+					"message": 4
+				}
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "MDL for WTFTP",
+			"type": "shell",
+			"command": "java -jar ~/Soft/MDL/mdl.jar wtftp.asm -cpu z180 -po -dialect sjasmplus",
+			"group": "build",
+			"problemMatcher": {
+				"applyTo": "allDocuments",
+				"fileLocation": [
+					"autoDetect",
+					"${workspaceFolder}"
+				],
+				"pattern": [
+					{
+						"regexp": "^(\\w+): (.+) in (.+)#([0-9]+): (.+)$",
+						"file": 3,
+						"line": 4,
+						"severity": 1,
+						"message": 5,
+						"code": 2
+					}
+				]
+			},
+			"presentation": {
+				"echo": false,
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": false,
+				"clear": true,
+				"revealProblems": "onProblem"
+			}
+		},
+		{
+			"label": "MDL for WTERM",
+			"type": "shell",
+			"command": "java -jar ~/Soft/MDL/mdl.jar wterm.asm -cpu z180 -po -dialect sjasmplus",
+			"group": "build",
+			"problemMatcher": {
+				"applyTo": "allDocuments",
+				"fileLocation": [
+					"autoDetect",
+					"${workspaceFolder}"
+				],
+				"pattern": [
+					{
+						"regexp": "^(\\w+): (.+) in (.+)#([0-9]+): (.+)$",
+						"file": 3,
+						"line": 4,
+						"severity": 1,
+						"message": 5,
+						"code": 2
+					}
+				]
+			},
+			"presentation": {
+				"echo": false,
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": false,
+				"clear": true,
+				"revealProblems": "onProblem"
+			}
+		}
+
+	]
 }

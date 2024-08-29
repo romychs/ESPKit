@@ -29,24 +29,24 @@ OP_ERROR	EQU '50'
 BUILD_RRQ_PACKET	
 	PUSH	DE
 	LD		DE,OP_RRQ									; opcode
-	CALL	.BUILD_RW_PACKET
+	CALL	BUILD_RW_PACKET
 	POP		DE
 	RET
 
 ; ------------------------------------------------------
 ; Build packet for write file to TFTF-server
 ; ------------------------------------------------------
-!BUILD_WRQ_PACKET
+BUILD_WRQ_PACKET
 	PUSH	DE
 	LD		DE,OP_WRQ									; opcode
-	CALL	.BUILD_RW_PACKET
+	CALL	BUILD_RW_PACKET
 	POP		DE
 	RET
 
 ; ------------------------------------------------------
 ; Build packet for write file or receive form TFTF-server
 ; ------------------------------------------------------
-.BUILD_RW_PACKET
+BUILD_RW_PACKET
 	LD		HL,TFTP_BUFF
 	LD		(HL), DE
 	INC		HL
@@ -72,7 +72,7 @@ BUILD_RRQ_PACKET
 	LD		(HL),DE
 	INC 	HL
 	INC 	HL
-	LD		DE,'t'
+	LD		D, 0										; DE = "/0t"
 	LD		(HL),DE
 	INC 	HL
 	INC 	HL
@@ -145,14 +145,14 @@ CHK_ERROR
 ; Defined TFTP Protocol Error messages
 ; ------------------------------------------------------
 
-;MSG_TFTPE_0	DB "Not defined, see error message (if any)."Z
-.MSG_TFTPE_1	DB "File not found."Z
-.MSG_TFTPE_2	DB "Access violation."Z
-.MSG_TFTPE_3	DB "Disk full or allocation exceeded."Z
-.MSG_TFTPE_4	DB "Illegal TFTP operation."Z
-.MSG_TFTPE_5	DB "Unknown transfer ID."Z
-.MSG_TFTPE_6	DB "File already exists."Z
-.MSG_TFTPE_7	DB "No such user."Z
+;MSG_TFTPE_0	DB "Not defined, see error message (if any).",0
+.MSG_TFTPE_1	DB "File not found.",0
+.MSG_TFTPE_2	DB "Access violation.",0
+.MSG_TFTPE_3	DB "Disk full or allocation exceeded.",0
+.MSG_TFTPE_4	DB "Illegal TFTP operation.",0
+.MSG_TFTPE_5	DB "Unknown transfer ID.",0
+.MSG_TFTPE_6	DB "File already exists.",0
+.MSG_TFTPE_7	DB "No such user.",0
 
 ; Table with error messages offsets
 .TFTPE_T 
@@ -160,10 +160,10 @@ CHK_ERROR
 	DW 	.MSG_TFTPE_4,.MSG_TFTPE_5,.MSG_TFTPE_7,.MSG_TFTPE_7
 
 .MSG_TFTP_ERR
-	DB "Protocol error: "Z
+	DB "Protocol error: ",0
 
 .MSG_ERR_UPT
-	DB "Unknown TFTP packet received!"Z
+	DB "Unknown TFTP packet received!",0
 
 ; Buffer for UDP datagram with TFTP payload
 TFTF_PACKET_LEN

@@ -85,8 +85,8 @@ DONE
 	CALL	CLOSE_LOCAL_FILE
 
 	;IFDEF	DEBUG
-	LD		B,0
-	DSS_EXEC	DSS_EXIT
+	LD		BC, DSS_EXIT
+	RST		DSS
 
 	;ENDIF
 
@@ -147,8 +147,9 @@ PARSE_CMD_LINE
     
 	; handle lfn
 	CALL	GET_LFN
-	CALL	COPY_LFN
-	RET
+	JP		COPY_LFN
+	;CALL	COPY_LFN
+	;RET
 	
 .PLC_UPLOAD
 	; Work mode "Upload"
@@ -162,9 +163,9 @@ PARSE_CMD_LINE
 	CALL	@UTIL.STARTSWITH
 	JR		NZ,OUT_USAGE_MSG
 
-	CALL	GET_SRV_PARAMS
-
-	RET
+	JP		GET_SRV_PARAMS
+	;CALL	GET_SRV_PARAMS
+	;RET
 
 ; ------------------------------------------------------
 OUT_ERR_CMD_MSG
@@ -339,7 +340,7 @@ OPEN_LOCAL_FILE
 	OR		A
 	JR		NZ,.OLF_SKP_CP
 	
-	LD		HL, @TMP_BUFF
+	LD		HL, TMP_BUFF
 	CALL	UTIL.GET_CUR_DIR
 	LD		DE,LOC_FILE
 	LD		B,128
@@ -352,7 +353,7 @@ OPEN_LOCAL_FILE
 	INC		DE
 	DJNZ	.OLF_NXT	
 .OLF_EFN
-	LD		HL, @TMP_BUFF
+	LD		HL, TMP_BUFF
 
 	; HL - points to file path name
 .OLF_SKP_CP
@@ -372,7 +373,7 @@ OPEN_LOCAL_FILE
 	POP		HL
 	JR		NC,.OLF_END
 	CP		0x07										; file exists?
-	JP		NZ,DSS_ERROR.PRINT							; print error and exit
+	JP		NZ,DSS_ERROR.EPRINT							; print error and exit
 	PUSH	HL
 	PRINTLN	MSG_OF_EXISTS
 	POP		HL
@@ -405,15 +406,15 @@ PRINT_FILENAME
 
 
 MSG_OF_EXISTS
-	DB	"Output file already exists!"Z
+	DB	"Output file already exists!",0
 	
 	IFDEF	TRACE
 MSG_LFN_CR
-    DB	"Create file: "Z	
+    DB	"Create file: ",0	
 MSG_LFN_OP
-    DB	"Open file: "Z	
+    DB	"Open file: ",0	
 MSG_LFN_OPEN
-	DB	"File successfully accessed."Z	
+	DB	"File successfully accessed.",0	
 	ENDIF
 
 
@@ -425,8 +426,9 @@ CLOSE_LOCAL_FILE
 	OR		A
 	RET		Z
 	DSS_EXEC	DSS_CLOSE_FILE
-	CALL	DSS_ERROR.CHECK
-	RET
+	JP		DSS_ERROR.CHECK
+	;CALL	DSS_ERROR.CHECK
+	;RET
 
 ; ------------------------------------------------------
 ; Display current working mode
@@ -456,48 +458,48 @@ DISPLAY_MODE
 ; ------------------------------------------------------
 
 MSG_START
-	DB "TFTP client for Sprinter-WiFi by Sprinter Team. v1.0 beta1, ", __DATE__, "\r\n"Z
+	DB "TFTP client for Sprinter-WiFi by Sprinter Team. v1.0 beta1, ", __DATE__, "\r\n",0
 
 MSG_ERR_CMD
-	DB "Invalid command line parameters!\r\n"Z
+	DB "Invalid command line parameters!\r\n",0
 
 MSG_HLP
 	DB "\r\nUse:\r\n  wtftp.exe tftp://server[:port]/filename filename  - to download from server;\r\n"
-	DB "  wtftp.exe filename tftp://server[:port]/filename  - to upload to server.\r\n"Z
+	DB "  wtftp.exe filename tftp://server[:port]/filename  - to upload to server.\r\n",0
 
 MSG_TX_ERROR
-	DB "Transmitter not ready"Z
+	DB "Transmitter not ready",0
 
 MSG_RX_ERROR
 	DB "Receiver error LSR: 0x"
 MSG_LSR_VALUE	
-	DB "xx"Z
+	DB "xx",0
 
 MSG_MANY_RX_ERROR
-	DB "Too many receiver errors!"Z
+	DB "Too many receiver errors!",0
 
 MSG_ERR_PORT
-	DB "Invalid UDP port in URL, will be number 1..65535"Z
+	DB "Invalid UDP port in URL, will be number 1..65535",0
 
 MSG_ERR_RFN
-	DB "Remote file name not specified in URL, or too long!"Z
+	DB "Remote file name not specified in URL, or too long!",0
 
 MSG_ERR_LFN
-    DB "Invalid local file name!"Z
+    DB "Invalid local file name!",0
 
 MSG_MODE_D
-	DB "Download file "Z
+	DB "Download file ",0
 MSG_MODE_D_S
-	DB " from server "Z
+	DB " from server ",0
 MSG_MODE_D_T
-	DB " to file "Z
+	DB " to file ",0
 
 MSG_MODE_U
-	DB "Upload file "Z
+	DB "Upload file ",0
 MSG_MODE_U_S
-	DB " to server "Z
+	DB " to server ",0
 MSG_MODE_U_T
-	DB " to file "Z
+	DB " to file ",0
 
 ; ------------------------------------------------------
 ; Variables
@@ -505,7 +507,7 @@ MSG_MODE_U_T
 
 ; Start of tftf URL
 TFTF_START
-	DB "tftp://"Z
+	DB "tftp://",0
 
 
 ; Work Mode
@@ -528,13 +530,15 @@ REM_FILE
 LOC_FILE	
 	DS 128,0
 
-; Local file handle
+; Local file handlewtftp.asm(343)
 LOC_FH
 	DW	0
 
 ; Non zero, if local file name contains path
 HAVE_PATH
 	DB	0
+
+TMP_BUFF EQU WIFI.RS_BUFF + RS_BUFF_SIZE
 
 	ENDMODULE
 ; ------------------------------------------------------
@@ -549,6 +553,6 @@ HAVE_PATH
 	INCLUDE "esplib.asm"
 
 
-TMP_BUFF
+
 
     END MAIN.START

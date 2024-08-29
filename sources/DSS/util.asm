@@ -5,10 +5,12 @@
 ; License: BSD 3-Clause
 ; ======================================================
 
-	IFNDEF _UTIL_ASM
-	DEFINE	_UTIL_ASM
+	IFNDEF _UTIL
+	DEFINE	_UTIL
 
 	MODULE UTIL
+
+	include "dss_error.asm"
 	
 ; ------------------------------------------------------
 ; Small delay
@@ -65,14 +67,14 @@ DELAY_100uS
 ;	Inp: 	HL - pointer to string
 ;	Out: 	BC - length of string
 ; ------------------------------------------------------
-	IFUSED STRLEN
+	;;IFUSED STRLEN
 STRLEN
 	PUSH	DE,HL,HL
 	LD		BC,MAX_BUFF_SIZE
 	XOR		A
 	CPIR
 	POP		DE
-	SUB		HL,DE										; llength of zero ended string
+	SBC		HL,DE										; length of zero ended string
 	LD		BC,HL
 	LD		A, B
 	OR		C
@@ -81,14 +83,14 @@ STRLEN
 .STRL_NCOR	
 	POP		HL,DE
 	RET
-	ENDIF
+	;ENDIF
 
 ; ------------------------------------------------------
 ; Compare strings
 ; 	Inp: 	HL, DE - pointers to asciiz strings to compare
 ; 	Out: 	CF=0 - equal, CF=1 - not equal
 ; ------------------------------------------------------
-	IFUSED STRCMP
+	;;IFUSED STRCMP
 STRCMP
 	PUSH	DE,HL
 .STC_NEXT
@@ -105,7 +107,7 @@ STRCMP
 .STC_EQ
 	POP		HL,DE
 	RET
-	ENDIF
+	;;ENDIF
 
 
 
@@ -115,7 +117,7 @@ STRCMP
 ;	   BC - Number of chars to compare
 ; Out: ZF=0 - not equal, ZF=1 - equal
 ; ------------------------------------------------------
-	IFUSED STRNCMP
+	;IFUSED STRNCMP
 STRNCMP
 	PUSH	HL,DE,BC
 .STRN_NXT
@@ -134,7 +136,7 @@ STRNCMP
 .STRN_NE
 	POP 	BC,DE,HL
     RET
-	ENDIF
+	;ENDIF
 
 ; ------------------------------------------------------
 ; Checks whether a string (HL) starts with the strinf (DE)
@@ -142,7 +144,7 @@ STRNCMP
 ;	   HL - points to string
 ; Out: ZF=0 - not equal, ZF=1 - equal
 ; ------------------------------------------------------
-	IFUSED	STARTSWITH
+	;;IFUSED	STARTSWITH
 STARTSWITH
 	PUSH	HL,DE
 .STRW_NXT
@@ -158,7 +160,7 @@ STARTSWITH
 .STRW_END
 	POP 	DE,HL
     RET
-	ENDIF
+	;;ENDIF
 
 
 ; ------------------------------------------------------
@@ -166,7 +168,7 @@ STARTSWITH
 ; Inp: HL - pointer to string
 ; Out: HL - points to first non space symbol
 ; ------------------------------------------------------
-	IFUSED	LTRIM
+	;;IFUSED	LTRIM
 LTRIM
 	LD	A, (HL)
 	OR	A
@@ -175,14 +177,14 @@ LTRIM
 	RET P
 	INC HL
 	JR	LTRIM
-	ENDIF
+	;;ENDIF
 
 ; ------------------------------------------------------
 ; Convert string to number
 ; Inp: DE - ptr to zero ended string
 ; Out: HL - Result
 ; ------------------------------------------------------
-	IFUSED ATOU
+	;;IFUSED ATOU
 ATOU
 	PUSH	BC
   	LD		HL,0x0000
@@ -208,7 +210,7 @@ ATOU
 .ATOU_LE
 	POP		BC
 	RET
-	ENDIF
+	;;ENDIF
 
 ; ------------------------------------------------------
 ; Convert 16 bit unsigned number to string
@@ -216,7 +218,7 @@ ATOU
 ; 	   DE - ptr to buffer
 ; Out: DE -> asciiz string representing a number
 ; ------------------------------------------------------
-	IFUSED 	UTOA
+	;;IFUSED 	UTOA
 UTOA:
 	PUSH	BC, HL
 	XOR		A
@@ -263,7 +265,7 @@ DIV_10:
 	DJNZ 	.DDL1
 	POP		BC
 	RET
-	ENDIF
+	;;ENDIF
 ; ------------------------------------------------------
 ; FAST_UTOA
 ;	Inp:	HL - number
@@ -271,7 +273,7 @@ DIV_10:
 ;			CF is set to write leading zeroes
 ;	Out:	DE - address of strinf 
 ; ------------------------------------------------------
-	IFUSED	FAST_UTOA
+	;;IFUSED	FAST_UTOA
 FAST_UTOA
 	LD		BC,0+256
 	PUSH 	BC
@@ -343,7 +345,7 @@ FAST_UTOA
 	INC		DE
 
 	JR 		.LEADING_ZEROES
-	ENDIF	
+	;;ENDIF	
 
 ; ------------------------------------------------------
 ; Find char in string
@@ -352,7 +354,7 @@ FAST_UTOA
 ;	Outp: 	CF=0, HL points to char if found
 ;		  	CF=1 - Not found
 ; ------------------------------------------------------
-	IFUSED	STRCHR
+	;;IFUSED	STRCHR
 STRCHR
 	PUSH	BC
 .STCH_NEXT	
@@ -363,20 +365,20 @@ STRCHR
 	CP		C
 	JR		Z, .STCH_FOUND
 	INC		HL
-	JR		STCH_NEXT
+	JR		.STCH_NEXT
 .STCH_N_FOUND
 	SCF
 .STCH_FOUND
 	POP		BC
 	RET
-	ENDIF
+	;;ENDIF
 
 ; ------------------------------------------------------
 ; Convert Byte to hex
 ;	Inp: C
 ;	Out: (DE)
 ; ------------------------------------------------------
-	IFUSED HEXB
+	;;IFUSED HEXB
 HEXB
 	LD		A,C
 	RRA
@@ -395,7 +397,7 @@ HEXB
 	LD		(DE), A
 	INC		DE
 	RET
-	ENDIF
+	;;ENDIF
 
 
 ; ----------------------------------------------------
@@ -407,7 +409,7 @@ GET_CUR_DIR
 	PUSH    HL
 	LD      C, DSS_CURDISK
 	RST     DSS
-	CALL	DSS_ERROR.CHECK
+	CALL	@DSS_ERROR.CHECK
 	ADD     A, 65
 	LD      (HL),A
 	INC     HL
@@ -415,10 +417,10 @@ GET_CUR_DIR
 	INC     HL
 	LD      C, DSS_CURDIR
 	RST     DSS
-	CALL	DSS_ERROR.CHECK
+	CALL	@DSS_ERROR.CHECK
 	POP     HL
-	CALL    ADD_BACK_SLASH
-	RET
+	JP    	ADD_BACK_SLASH
+	;RET
 
 ; ----------------------------------------------------
 ; Add back slash to path string

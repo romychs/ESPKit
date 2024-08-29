@@ -5,8 +5,8 @@
 ; License: BSD 3-Clause
 ; ======================================================
 
-	IFNDEF	_ISA_ASM
-	DEFINE	_ISA_ASM
+	IFNDEF	_ISA
+	DEFINE	_ISA
 
 	INCLUDE "sprinter.inc"
 	INCLUDE "util.asm"
@@ -39,8 +39,8 @@ ISA_RESET
 	XOR 	A
 	OUT 	(C), A										; RESET=0 AEN=0
 	LD		HL,100
-	CALL 	@UTIL.DELAY
-	RET
+	JP		@UTIL.DELAY
+	;RET
 
 ; ------------------------------------------------------
 ; Open access to ISA ports as memory
@@ -54,7 +54,8 @@ ISA_OPEN
 	LD 		BC, PORT_SYSTEM
 	LD 		A, 0x11
 	OUT 	(C), A
-ISA_SLOT+*	LD	A,0x00
+ISA_SLOT	EQU $+1
+	LD		A,0x00
 	SLA		A
 	OR 		A, 0xD4										; D4 - ISA1, D6 - ISA2
 	LD		BC, PAGE3

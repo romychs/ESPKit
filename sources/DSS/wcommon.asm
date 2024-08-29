@@ -4,6 +4,10 @@
 ; https://github.com/romychs
 ; License: BSD 3-Clause
 ; ======================================================
+	IFNDEF	_WCOMMON
+	DEFINE	_WCOMMON
+
+
 
 ENABLE_RTS_CTR	EQU 1
 
@@ -12,7 +16,7 @@ ENABLE_RTS_CTR	EQU 1
 ; ------------------------------------------------------
 ; Ckeck for error (CF=1) print message and exit
 ; ------------------------------------------------------
-	IFUSED CHECK_ERROR
+	;;IFUSED CHECK_ERROR
 CHECK_ERROR
 	RET		NC
 	ADD		A,'0'
@@ -21,7 +25,7 @@ CHECK_ERROR
 	CALL	DUMP_UART_REGS
 	LD		B,3
 	POP		HL											; ret addr reset
-	ENDIF
+	;;ENDIF
 
 ; ------------------------------------------------------
 ;	Program exit point
@@ -32,7 +36,7 @@ EXIT
 ; ------------------------------------------------------
 ; Search Sprinter WiFi card
 ; ------------------------------------------------------
-	IFUSED FIND_SWF
+	;;IFUSED FIND_SWF
 FIND_SWF
 	; Find Sprinter-WiFi
 	CALL    @WIFI.UART_FIND
@@ -48,12 +52,12 @@ NO_TL_FOUND
 	PRINTLN MSG_SWF_NOF
 	LD		B,2
 	JP		EXIT
-	ENDIF
+	;;ENDIF
 
 ; ------------------------------------------------------
 ; Dump all UTL16C550 registers to screen for debug
 ; ------------------------------------------------------
-	IFUSED DUMP_UART_REGS
+	;;IFUSED DUMP_UART_REGS
 	IFDEF	TRACE
 DUMP_UART_REGS
 	; Dump, DLAB=0 registers
@@ -70,8 +74,9 @@ DUMP_UART_REGS
 
 	LD		HL, REG_LCR
 	LD		E, LCR_WL8
-	CALL	WIFI.UART_WRITE
-	RET
+	JP		WIFI.UART_WRITE
+	;CALL	WIFI.UART_WRITE
+	;RET
 
 DUMP_REGS
 	LD		HL, PORT_UART_A
@@ -95,12 +100,12 @@ DR_NEXT
 	DJNZ	DR_NEXT
 	RET	
 	ENDIF
-	ENDIF
+	;;ENDIF
 
 ; ------------------------------------------------------
 ; Store old video mode, set 80x32 and clear
 ; ------------------------------------------------------
-	IFUSED INIT_VMODE
+	;;IFUSED INIT_VMODE
 INIT_VMODE
 	PUSH	BC,DE,HL
 	; Store previous vmode
@@ -116,19 +121,18 @@ INIT_VMODE
 IVM_ALRDY_80
 	; Clear screen
 	LD		A,' '
-	LD		B,0x07
-	LD		C,DSS_CLEAR
+	LD		BC,0x0700 + DSS_CLEAR
 	LD		HL,0x2050
 	LD		DE,0x0000
 	RST		DSS
 
 	POP		HL,DE,BC
 	RET
-	ENDIF
+	;;ENDIF
 ; ------------------------------------------------------
 ; Restore saved video mode
 ; ------------------------------------------------------
-	IFUSED	REST_VMODE
+	;;IFUSED	REST_VMODE
 REST_VMODE
 	PUSH	BC
 	LD		A,(SAVE_VMODE)
@@ -145,12 +149,12 @@ REST_VMODE
 RVM_SAME	
 	POP		BC
 	RET
-	ENDIF
+	;;ENDIF
 
 ; ------------------------------------------------------
 ; Init basic parameters of ESP
 ; ------------------------------------------------------
-	IFUSED INIT_ESP
+	;;IFUSED INIT_ESP
 INIT_ESP
 	PUSH	BC, DE
 	LD		DE, @WIFI.RS_BUFF
@@ -174,12 +178,12 @@ INIT_ESP
 	SEND_CMD CMD_CWLAP_OPT
 	POP		DE,BC
 	RET
-	ENDIF
+	;;ENDIF
 ; ------------------------------------------------------
 ; Set DHCP mode
 ; Out: CF=1 if error
 ; ------------------------------------------------------
-	IFUSED SET_DHCP_MODE
+	;;IFUSED SET_DHCP_MODE
 SET_DHCP_MODE
 	PUSH	BC,DE
 	LD		DE, WIFI.RS_BUFF
@@ -188,19 +192,19 @@ SET_DHCP_MODE
 	SEND_CMD CMD_SET_DHCP
 	POP		DE,BC
 	RET
-	ENDIF
+	;;ENDIF
 
 ; ------------------------------------------------------
 ; Messages
 ; ------------------------------------------------------
-	IFUSED FIND_SWF
+	;;IFUSED FIND_SWF
 MSG_SWF_NOF
 	DB "Sprinter-WiFi not found!",0
 MSG_SWF_FOUND
 	DB "Sprinter-WiFi found in ISA#"
 MSG_SLOT_NO
 	DB "n slot.",0
-	ENDIF
+	;;ENDIF
 
 MSG_COMM_ERROR
 	DB "Error communication with Sprinter-WiFi #"
@@ -220,10 +224,10 @@ MSG_UART_INIT
 LINE_END 
 	DB "\r\n",0
 
-	IFUSED INIT_VMODE
+	;;IFUSED INIT_VMODE
 SAVE_VMODE
 	DB 0
-	ENDIF
+	;;ENDIF
 
 ; ------------------------------------------------------
 ; Debug messages
@@ -287,3 +291,5 @@ CMD_GET_IP
 
 
 	ENDMODULE
+
+	ENDIF

@@ -5,6 +5,9 @@
 ; License: BSD 3-Clause
 ; ======================================================
 
+	IFNDEF	_ESP_LIB
+	DEFINE	_ESP_LIB
+
 
 	INCLUDE	"isa.asm"
 	INCLUDE "util.asm"
@@ -132,8 +135,9 @@ UT_T_SLOT
 	CALL	CHK_SCR
 	RET		NZ
 	LD		DE,0xAAAA
-	CALL	CHK_SCR
-	RET
+	JP		CHK_SCR
+	;CALL	CHK_SCR
+	;RET
 
 CHK_SCR	
 	LD		HL, REG_SCR
@@ -152,20 +156,16 @@ UART_INIT
 
 	CALL 	ISA.ISA_OPEN
 	LD		IX, PORT_UART_A
-	LD		A, FCR_TR8 | FCR_FIFO						; Enable FIFO buffer, trigger to 14 byte
-	LD		(IX+_FCR),A									
+	LD		(IX+_FCR),FCR_TR8 | FCR_FIFO				; Enable FIFO buffer, trigger to 14 byte
 	XOR 	A
 	LD 		(IX+_IER), A								; Disable interrupts
 
 	; Set 8bit word and Divisor for speed
-	LD 		A, LCR_DLAB | LCR_WL8
-	LD 		(IX+_LCR), A								; Enable Baud rate latch
-	LD 		A, DIVISOR
-	LD 		(IX+_DLL), A								; 8 - 115200
+	LD 		(IX+_LCR), LCR_DLAB | LCR_WL8				; Enable Baud rate latch
+	LD 		(IX+_DLL), DIVISOR							; 8 - 115200
 	XOR 	A
 	LD		(IX+_DLM), A
-	LD 		A, LCR_WL8									; 8bit word, disable latch
-	LD 		(IX+_LCR), A
+	LD 		(IX+_LCR), LCR_WL8							; 8bit word, disable latch
 	CALL 	ISA.ISA_CLOSE
 
 	POP 	IX,AF
@@ -181,8 +181,9 @@ UART_INIT
 UART_READ
 	CALL 	ISA.ISA_OPEN
 	LD 		A, (HL)
-	CALL 	ISA.ISA_CLOSE
-	RET
+	JP		ISA.ISA_CLOSE
+	;CALL 	ISA.ISA_CLOSE
+	;RET
 	;ENDIF
 ; ------------------------------------------------------
 ; Write TL16C550 register
@@ -192,8 +193,9 @@ UART_READ
 UART_WRITE            
 	CALL	ISA.ISA_OPEN
 	LD 		(HL), E
-	CALL 	ISA.ISA_CLOSE
-	RET
+	JP		ISA.ISA_CLOSE
+	;CALL 	ISA.ISA_CLOSE
+	;RET
 	;ENDIF
 ; ------------------------------------------------------
 ; Wait for transmitter ready
@@ -203,8 +205,9 @@ UART_WRITE
 UART_WAIT_TR
 	CALL	ISA.ISA_OPEN
 	CALL	UART_WAIT_TR_INT
-	CALL	ISA.ISA_CLOSE
-	RET
+	JP		ISA.ISA_CLOSE
+	;CALL	ISA.ISA_CLOSE
+	;RET
 	;ENDIF
 ;
 ; Wait, without open/close ISA
@@ -333,7 +336,8 @@ UART_EMPTY_RS
 ; ------------------------------------------------------
 UART_WAIT_RS1
 	PUSH	BC,HL
-WAIT_MS+*	LD	BC,0x2000
+WAIT_MS	EQU	$+1
+	LD		BC,0x2000
 	JR		UVR_NEXT
 UART_WAIT_RS
 	PUSH	BC,HL
@@ -508,3 +512,5 @@ RS_BUFF
 	;DS RS_BUFF_SIZE, 0
 
 	ENDMODULE
+
+	END

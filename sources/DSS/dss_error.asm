@@ -4,6 +4,9 @@
 ; https://github.com/romychs
 ; License: BSD 3-Clause
 ; ======================================================
+	IFNDEF	_DSS_ERROR
+	DEFINE	_DSS_ERROR
+
 	MODULE DSS_ERROR
 
 ERR_MAX		EQU  0x26
@@ -12,7 +15,7 @@ ERR_MAX		EQU  0x26
 CHECK
 	RET		NC
 
-PRINT
+EPRINT
 	PUSH	AF
 	PRINT	GET_ERR_MSG.MSG_DSS_ERROR
 	POP		AF
@@ -47,46 +50,46 @@ GET_ERR_MSG
 	RET
 
 .MSG_DSS_ERROR
-			DB " Error: "Z
+			DB " Error: ",0
 
-.MSG_E01	DB	"Invalid function"Z
-.MSG_E02	DB	"Invalid drive number"Z
-.MSG_E03	DB	"File not found"Z
-.MSG_E04	DB	"Path not found"Z
-.MSG_E05	DB	"Invalid handle"Z
-.MSG_E06	DB	"Too many open files"Z
-.MSG_E07	DB	"File exist"Z
-.MSG_E08	DB	"File read only"Z
-.MSG_E09	DB	"Root overflow"Z
-.MSG_E0A	DB	"No free space"Z
-.MSG_E0B	DB	"Directory not empty"Z
-.MSG_E0C	DB	"Attempt to remove current directory"Z
-.MSG_E0D	DB	"Invalid media"Z
-.MSG_E0E	DB	"Invalid operation"Z
-.MSG_E0F	DB	"Directory exist"Z
-.MSG_E10	DB	"Invalid filename"Z
-.MSG_E11	DB	"Invalid EXE-file"Z
-.MSG_E12	DB	"Not supported EXE-file"Z
-.MSG_E13	DB	"Permission denied"Z
-.MSG_E14	DB	"Not ready"Z
-.MSG_E15	DB	"Seek error"Z
-.MSG_E16	DB	"Sector not found"Z
-.MSG_E17	DB	"CRC error"Z
-.MSG_E18	DB	"Write protect"Z
-.MSG_E19	DB	"Read error"Z
-.MSG_E1A	DB	"Write error"Z
-.MSG_E1B	DB	"Drive failure"Z
-.MSG_E1C	DB	"Unknown error: 28"Z
-.MSG_E1D	DB	"Unknown error: 29"Z
-.MSG_E1E	DB	"No free memory"Z
-.MSG_E1F	DB	"Invalid memory block"Z
-.MSG_E20	DB	"Unknown error: 32"Z
-.MSG_E21	DB	"Extended error: 33"Z
-.MSG_E22	DB	"Extended error: 34"Z
-.MSG_E23	DB	"Too many files"Z
-.MSG_E24	DB	"Too many or too nested folders (>1024)"Z
-.MSG_E25	DB	"User abort"Z
-.MSG_E26	DB	"Unknown error"Z
+.MSG_E01	DB	"Invalid function",0
+.MSG_E02	DB	"Invalid drive number",0
+.MSG_E03	DB	"File not found",0
+.MSG_E04	DB	"Path not found",0
+.MSG_E05	DB	"Invalid handle",0
+.MSG_E06	DB	"Too many open files",0
+.MSG_E07	DB	"File exist",0
+.MSG_E08	DB	"File read only",0
+.MSG_E09	DB	"Root overflow",0
+.MSG_E0A	DB	"No free space",0
+.MSG_E0B	DB	"Directory not empty",0
+.MSG_E0C	DB	"Attempt to remove current directory",0
+.MSG_E0D	DB	"Invalid media",0
+.MSG_E0E	DB	"Invalid operation",0
+.MSG_E0F	DB	"Directory exist",0
+.MSG_E10	DB	"Invalid filename",0
+.MSG_E11	DB	"Invalid EXE-file",0
+.MSG_E12	DB	"Not supported EXE-file",0
+.MSG_E13	DB	"Permission denied",0
+.MSG_E14	DB	"Not ready",0
+.MSG_E15	DB	"Seek error",0
+.MSG_E16	DB	"Sector not found",0
+.MSG_E17	DB	"CRC error",0
+.MSG_E18	DB	"Write protect",0
+.MSG_E19	DB	"Read error",0
+.MSG_E1A	DB	"Write error",0
+.MSG_E1B	DB	"Drive failure",0
+.MSG_E1C	DB	"Unknown error: 28",0
+.MSG_E1D	DB	"Unknown error: 29",0
+.MSG_E1E	DB	"No free memory",0
+.MSG_E1F	DB	"Invalid memory block",0
+.MSG_E20	DB	"Unknown error: 32",0
+.MSG_E21	DB	"Extended error: 33",0
+.MSG_E22	DB	"Extended error: 34",0
+.MSG_E23	DB	"Too many files",0
+.MSG_E24	DB	"Too many or too nested folders (>1024)",0
+.MSG_E25	DB	"User abort",0
+.MSG_E26	DB	"Unknown error",0
 
 .ERR_OFFSETS
 	DW	.MSG_E01,.MSG_E02,.MSG_E03,.MSG_E04,.MSG_E05,.MSG_E06,.MSG_E07,.MSG_E08
@@ -97,3 +100,4 @@ GET_ERR_MSG
 
 	ENDMODULE
 	
+	ENDIF

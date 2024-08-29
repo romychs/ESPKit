@@ -40,7 +40,7 @@ DEFAULT_TIMEOUT		EQU	2000
 ; ------------------------------------------------------
 EXE_HEADER
     DB  "EXE"
-    DB  EXE_VERSION                                     ; EXE Version
+    DB  EXE_VERSION                     util.asm(418)                ; EXE Version
     DW  0x0080                                          ; Code offset
     DW  0
     DW  0                                               ; Primary loader size
@@ -163,7 +163,7 @@ SET_DHCP_MODE
 	PUSH	BC,DE
 	LD		DE, WIFI.RS_BUFF
 	LD		BC, DEFAULT_TIMEOUT
-	TRACELN MSG_SET_DHCP
+	TRACELN MSG_SET_DHCPutil.asm(418)
 	SEND_CMD CMD_SET_DHCP
 	POP		DE,BC
 	RET

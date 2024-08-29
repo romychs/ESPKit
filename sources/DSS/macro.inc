@@ -62,7 +62,8 @@
 	; If current work mode is upload, go to label
 	MACRO	IF_UPLOAD_GO lbl
 		LD		A,(WORK_MODE)
-		CP		WM_UPLOAD
+		;CP		WM_UPLOAD
+		DEC		A
 		JR		Z,lbl
 	ENDM
 

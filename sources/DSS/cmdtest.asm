@@ -56,12 +56,12 @@ START
 
 
 MSG_CMDLINE
-	DB "\r\nCommandline:"Z
+	DB "\r\nCommandline:",0
 
 MSG_CURPATH
-	DB "\r\nExePath:"Z
+	DB "\r\nExePath:",0
 
 MSG_LINE_END
-	DB "\r\n"Z	
+	DB "\r\n",0	
 
 	ENDMODULE

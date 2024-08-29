@@ -10,7 +10,7 @@
 ;DEFINE               EQU 0
 
 ; Define to output TRACE messages
-DEFINE				TRACE
+	DEFINE			TRACE
 
 
 ; Version of EXE file, 1 for DSS 1.70+
@@ -19,11 +19,9 @@ EXE_VERSION         EQU 1
 ; Timeout to wait ESP response
 DEFAULT_TIMEOUT		EQU	2000
 
-	DEFDEVICE SPRINTER, 0x4000, 256, 0,1,2,3
-
+	;DEFDEVICE SPRINTER, 0x4000, 256, 0,1,2,3
     SLDOPT COMMENT WPMEM, LOGPOINT, ASSERTION
-
-    DEVICE SPRINTER ;NOSLOT64K
+    DEVICE NOSLOT64K
 	
     IFDEF	DEBUG
 		INCLUDE "dss.asm"
@@ -205,27 +203,27 @@ OK_EXIT
 ; ------------------------------------------------------
 
 MSG_START
-	DB "Terminal for Sprinter-WiFi by Sprinter Team. v1.0 beta3, ", __DATE__, "\r\n"Z
+	DB "Terminal for Sprinter-WiFi by Sprinter Team. v1.0 beta3, ", __DATE__, "\r\n",0
 MSG_HLP
-	DB"\r\nEnter ESP AT command or Alt+x to close terminal."Z
+	DB"\r\nEnter ESP AT command or Alt+x to close terminal.",0
 MSG_EXIT
 
 MSG_TX_ERROR
-	DB "Transmitter not ready"Z
+	DB "Transmitter not ready",0
 
 MSG_RX_ERROR
 	DB "Receiver error LSR: 0x"
 MSG_LSR_VALUE	
-	DB "xx"Z
+	DB "xx",0
 
 MSG_MANY_RX_ERROR
-	DB "Too many receiver errors!"Z
+	DB "Too many receiver errors!",0
 
 
 MSG_ALT
 	DB "Pressed ALT+"
 MSG_ALT_KEY
-	DB "xx"Z
+	DB "xx",0
 
 ; TX_DATA
 ; 	DB  " ",0
@@ -233,21 +231,22 @@ MSG_ALT_KEY
 ; Custom commands
 ; ------------------------------------------------------
 CMD_QUIT 
-    DB "QUIT\r"Z
+    DB "QUIT\r",0
 
 RX_ERR
 	DB 0
 
 	IFDEF DEBUG
-CMD_TEST1	DB "ATE0\r\n"Z
+CMD_TEST1	DB "ATE0\r\n",0
 BUFF_TEST1	DS RS_BUFF_SIZE,0
 	ENDIF
 
 	ENDMODULE
 
 	INCLUDE "wcommon.asm"
+	INCLUDE "dss_error.asm"
 	;INCLUDE "util.asm"
 	INCLUDE "isa.asm"
 	INCLUDE "esplib.asm"
 
-    END MAIN.START
+    END ;MAIN.START
