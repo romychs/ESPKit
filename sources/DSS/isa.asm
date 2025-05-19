@@ -33,7 +33,7 @@ ISA_RST			EQU	0x80
 ; ------------------------------------------------------
 ISA_RESET
 	LD		BC, PORT_ISA
-	LD		A,ISA_RST | ISA_AEN							; RESET=1 AEN=1	
+	LD		A,ISA_RST | ISA_AEN							; RESET=1 AEN=1
 	OUT 	(C), A
 	CALL 	@UTIL.DELAY_1MS
 	XOR 	A
@@ -44,7 +44,6 @@ ISA_RESET
 
 ; ------------------------------------------------------
 ; Open access to ISA ports as memory
-;   Inp: A = 0 - ISA slot 0, 1 - ISA SLOT 1
 ; ------------------------------------------------------
 ISA_OPEN
 	PUSH	AF,BC
@@ -58,6 +57,7 @@ ISA_SLOT	EQU $+1
 	LD		A, 0x00
 	SLA		A
 	OR 		A, 0xD4										; D4 - ISA1, D6 - ISA2
+	//AND		A, 0xFB										; mem
 	LD		BC, PAGE3
 	OUT 	(C), A
 	LD 		BC, PORT_ISA
@@ -82,8 +82,8 @@ ISA_CLOSE
 	RET
 
 ; To save memory page 3
-SAVE_MMU3		DB	0									
+SAVE_MMU3		DB	0
 
 	ENDMODULE
-	
+
 	ENDIF

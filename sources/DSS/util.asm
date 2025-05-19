@@ -11,7 +11,7 @@
 	MODULE UTIL
 
 	include "dss_error.asm"
-	
+
 ; ------------------------------------------------------
 ; Small delay
 ; Inp:	HL - number of cycles, if HL=0, then 2000
@@ -80,7 +80,7 @@ STRLEN
 	OR		C
 	JR		Z, .STRL_NCOR
 	DEC		BC
-.STRL_NCOR	
+.STRL_NCOR
 	POP		HL,DE
 	RET
 	;ENDIF
@@ -98,7 +98,7 @@ STRCMP
 	CP		(HL)
 	JR		NZ,.STC_NE
 	AND		A
-	JR		Z,.STC_EQ	
+	JR		Z,.STC_EQ
 	INC		DE
 	INC		HL
 	JR		.STC_NEXT
@@ -256,7 +256,7 @@ DIV_10:
 	RLA
 .DDL1
 	ADD 	HL,HL
-	RLA	
+	RLA
 	CP 		C
 	JR 		C,.DDL2
 	SUB 	C
@@ -269,9 +269,9 @@ DIV_10:
 ; ------------------------------------------------------
 ; FAST_UTOA
 ;	Inp:	HL - number
-;			DE - Buffer 
+;			DE - Buffer
 ;			CF is set to write leading zeroes
-;	Out:	DE - address of strinf 
+;	Out:	DE - address of strinf
 ; ------------------------------------------------------
 	;;IFUSED	FAST_UTOA
 FAST_UTOA
@@ -345,7 +345,7 @@ FAST_UTOA
 	INC		DE
 
 	JR 		.LEADING_ZEROES
-	;;ENDIF	
+	;;ENDIF
 
 ; ------------------------------------------------------
 ; Find char in string
@@ -357,7 +357,7 @@ FAST_UTOA
 	;;IFUSED	STRCHR
 STRCHR
 	PUSH	BC
-.STCH_NEXT	
+.STCH_NEXT
 	LD		C,A
 	LD		A,(HL)
 	AND		A
@@ -404,12 +404,12 @@ HEXB
 ;  Get full current path
 ;  Inp: HP - pointer to buffer for path
 ; ----------------------------------------------------
-	
+
 GET_CUR_DIR
 	PUSH    HL
 	LD      C, DSS_CURDISK
 	RST     DSS
-	CALL	@DSS_ERROR.CHECK
+	CALL	DSS_ERROR.CHECK
 	ADD     A, 65
 	LD      (HL),A
 	INC     HL
@@ -417,7 +417,7 @@ GET_CUR_DIR
 	INC     HL
 	LD      C, DSS_CURDIR
 	RST     DSS
-	CALL	@DSS_ERROR.CHECK
+	CALL	DSS_ERROR.CHECK
 	POP     HL
 	JP    	ADD_BACK_SLASH
 	;RET
@@ -448,7 +448,7 @@ ADD_BACK_SLASH
     INC     HL
     LD      (HL),0x0
     RET
-	
+
 	ENDMODULE
-	
+
 	ENDIF

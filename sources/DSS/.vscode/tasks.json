@@ -137,7 +137,7 @@
 			}
 		},
 		{
-			"label": "MDL for WTFTP",
+			"label": "MDL optimization for WTFTP",
 			"type": "shell",
 			"command": "java -jar ~/Soft/MDL/mdl.jar wtftp.asm -cpu z180 -po -dialect sjasmplus",
 			"group": "build",
@@ -161,7 +161,7 @@
 			"presentation": {
 				"echo": false,
 				"focus": false,
-				"panel": "shared",
+				"panel": "dedicated",
 				"showReuseMessage": false,
 				"clear": true,
 				"revealProblems": "onProblem"

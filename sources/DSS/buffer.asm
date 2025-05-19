@@ -110,7 +110,7 @@ GET
 	LD  	DE,(PTR_TAIL)
 	LD		A,L
 	CP		E
-	JP		NZ, G_NOTE
+	JP		NZ, G_NOTEINCLUDE "dss.inc"
 	LD  	A, H
 	CP		D
 	JP		NZ, G_NOTE

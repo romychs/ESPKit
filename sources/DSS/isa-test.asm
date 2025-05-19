@@ -22,7 +22,7 @@ DEFAULT_TIMEOUT		EQU	2000
     SLDOPT COMMENT WPMEM, LOGPOINT, ASSERTION
 
     DEVICE NOSLOT64K
-	
+
 	INCLUDE "macro.inc"
 	INCLUDE "dss.inc"
 	INCLUDE "sprinter.inc"
@@ -47,10 +47,10 @@ EXE_HEADER
 
     ORG 0x8100
 @STACK_TOP
-	
+
 ; ------------------------------------------------------
 START
-	
+
     IFDEF	DEBUG
     	; LD 		IX,CMD_LINE1
 		LD		SP, STACK_TOP
@@ -61,51 +61,60 @@ START
 
     PRINTLN MSG_START
 
-	
+
 	XOR		A
 	LD		(ISA.ISA_SLOT),A
 
 	CALL	ISA.ISA_OPEN
-	
-	; --------- IOW/IOR/A0-A7/D0-D7 --------------
+
+; --------- IOW/IOR/A0-A7/D0-D7 --------------
 ; 	LD	D,0
 ; L_DATA
 ; 	LD	HL, PORT_UART_A
 ; 	LD	B,0x08
-; L_PORT		
+; L_PORT
 ; 	LD	(HL), D
 ; 	LD	E,(HL)
 ; 	INC HL
 ; 	DJNZ L_PORT
 ; 	INC D
 
-	CALL	ISA.ISA_OPEN
+//	CALL	ISA.ISA_OPEN
 
 	LD	HL, REG_SCR
 	LD  D,0x55
 
+	; STROBE ON
 	LD		BC, PORT_ISA
 	LD		A, ISA_AEN							; AEN=1	 (for sync  LA by front)
 	OUT 	(C), A
-	
-	;
-	LD	(HL), D
-	LD	D,(HL)	
 
-	LD  D,0xAA
-	LD	(HL), D
-	LD	D,(HL)	
+	; TRANSFER TO ISA
+	LD	HL, 0x8000
+	LD	DE, 0xC000
+	LD	BC, 0x4000
+	LDIR
 
+	; STROBE OFF
 	LD		BC, PORT_ISA
-	LD		A, 0								; AEN=0	
+	LD		A, 0								; AEN=0
 	OUT 	(C), A
 
+	; TRANSFER FROM ISA
+	LD	DE, 0x4000
+	LD	HL, 0xC000
+	LD	BC, 0x4000
+	LDIR
+
+
+
+	; Close window
 	CALL	ISA.ISA_CLOSE
 
 
 	; --------- RESET & AEN --------------
 	; LD		BC, PORT_ISA
-	; LD		A,ISA_RST | ISA_AEN							; RESET=1 AEN=1	
+	; LD		A,ISA_RST | ISA_AEN							; RESET=1 AEN=1
 	; OUT 	(C), A
 	; CALL 	UTIL.DELAY_100uS
 	; XOR 	A

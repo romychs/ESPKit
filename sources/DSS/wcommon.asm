@@ -22,7 +22,9 @@ CHECK_ERROR
 	ADD		A,'0'
 	LD		(COMM_ERROR_NO), A
 	PRINTLN	MSG_COMM_ERROR
+	IFDEF	TRACE
 	CALL	DUMP_UART_REGS
+	ENDIF
 	LD		B,3
 	POP		HL											; ret addr reset
 	;;ENDIF
@@ -30,7 +32,7 @@ CHECK_ERROR
 ; ------------------------------------------------------
 ;	Program exit point
 ; ------------------------------------------------------
-EXIT	
+EXIT
 	CALL	REST_VMODE
     DSS_EXEC	DSS_EXIT
 ; ------------------------------------------------------
@@ -68,7 +70,7 @@ DUMP_UART_REGS
 	LD		HL, REG_LCR
 	LD		E, LCR_DLAB | LCR_WL8
 	CALL	WIFI.UART_WRITE
-	
+
 	LD		BC, 0x0210
 	CALL	DUMP_REGS
 
@@ -80,25 +82,25 @@ DUMP_UART_REGS
 
 DUMP_REGS
 	LD		HL, PORT_UART_A
-	
-DR_NEXT	
+
+DR_NEXT
 	LD		DE,MSG_DR_RN
 	CALL	@UTIL.HEXB
-	INC		C	
+	INC		C
 
 	CALL    WIFI.UART_READ
 	PUSH    BC
 	LD		C,A
 	LD		DE,MSG_DR_RV
 	CALL	@UTIL.HEXB
-	PUSH 	HL	
-		
+	PUSH 	HL
+
 	PRINTLN MSG_DR
 
 	POP		HL,BC
 	INC		HL
 	DJNZ	DR_NEXT
-	RET	
+	RET
 	ENDIF
 	;;ENDIF
 
@@ -146,7 +148,7 @@ REST_VMODE
 
 	LD		C,DSS_SETVMOD
 	RST		DSS
-RVM_SAME	
+RVM_SAME
 	POP		BC
 	RET
 	;;ENDIF
@@ -221,7 +223,7 @@ MSG_ESP_RESET
 MSG_UART_INIT
 	DB "Reset UART.",0
 
-LINE_END 
+LINE_END
 	DB "\r\n",0
 
 	;;IFUSED INIT_VMODE
@@ -235,12 +237,12 @@ SAVE_VMODE
 	IFDEF TRACE
 MSG_DR
 	DB	"Reg[0x"
-MSG_DR_RN	
+MSG_DR_RN
 	DB	"vv]=0x"
-MSG_DR_RV	
+MSG_DR_RV
 	DB	"vv",0
 
-MSG_ECHO_OFF 
+MSG_ECHO_OFF
 	DB "Echo off",0
 
 MSG_STATIOJN_MODE
@@ -263,13 +265,13 @@ MSG_SET_DHCP
 ; ------------------------------------------------------
 ; Commands
 ; ------------------------------------------------------
-; CMD_QUIT 
+; CMD_QUIT
 ;     DB "QUIT\r",0
 
 CMD_VERSION
-	DB "AT+GMR\r\n",0	
-CMD_SET_SPEED 
-	DB	"AT+UART_CUR=115200,8,1,0,3\r\n",0	
+	DB "AT+GMR\r\n",0
+CMD_SET_SPEED
+	DB	"AT+UART_CUR=115200,8,1,0,3\r\n",0
 CMD_ECHO_OFF
 	DB	"ATE0\r\n",0
 CMD_STATION_MODE
